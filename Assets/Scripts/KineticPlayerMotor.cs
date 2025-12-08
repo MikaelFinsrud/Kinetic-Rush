@@ -60,6 +60,8 @@ public class KineticPlayerMotor : MonoBehaviour
     private float _slideTimer;
     [SerializeField] private float slideBufferTime = 0.1f;
     private float _slideBufferTimer;
+    [SerializeField] private float slideCooldownTime = 0.2f;
+    private float _slideCooldownTimer;
 
     [Header("Crouch")]
     [Tooltip("Capsule height multiplier when crouched/ sliding.")]
@@ -250,9 +252,20 @@ public class KineticPlayerMotor : MonoBehaviour
         }
     }
 
+    private void UpdateSlideCooldownTimer()
+    {
+        if (_slideCooldownTimer > 0f)
+        {
+            _slideCooldownTimer -= Time.fixedDeltaTime;
+            if (_slideCooldownTimer < 0f) _slideCooldownTimer = 0f;
+        }
+    }
+
     private void ApplyMovement()
     {
         Vector3 velocity = _rb.linearVelocity;
+
+        UpdateSlideCooldownTimer();
 
         UpdateCoyoteTimer(velocity);
 
@@ -288,10 +301,7 @@ public class KineticPlayerMotor : MonoBehaviour
 
                 if (_isSliding)
                 {
-                    // slide cancelled by jump
-                    _isSliding = false;
-                    // try to stand up after leaving ground; if there’s a low ceiling we stay crouched
-                    TryStandUp();
+                    StopSlide();
                 }
             }
         }
@@ -392,6 +402,7 @@ public class KineticPlayerMotor : MonoBehaviour
         }
 
         bool hasBufferedSlide = _slideBufferTimer > 0f;
+        bool slideOnCooldown = _slideCooldownTimer > 0f;
 
         // Start slide / crouch on key press
         if (_slidePressed)
@@ -402,13 +413,15 @@ public class KineticPlayerMotor : MonoBehaviour
                 Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
                 float speed = horizontal.magnitude;
 
-                if (speed >= minSlideSpeed)
+                if (!slideOnCooldown && speed >= minSlideSpeed)
                 {
                     StartSlide(ref velocity, horizontal, speed);
+                    _slideBufferTimer = 0f; // consume buffer
                 }
                 else
                 {
                     StartCrouch(false);
+                    _slideBufferTimer = 0f;
                 }
             }
             else
@@ -417,7 +430,7 @@ public class KineticPlayerMotor : MonoBehaviour
                 StartCrouch(false);
             }
         }
-        else if (hasBufferedSlide && _isGrounded && !_isSliding)
+        else if (hasBufferedSlide && _isGrounded && !_isSliding && !slideOnCooldown)
         {
             Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
             float speed = horizontal.magnitude;
@@ -496,6 +509,8 @@ public class KineticPlayerMotor : MonoBehaviour
     private void StopSlide()
     {
         _isSliding = false;
+        _slideCooldownTimer = slideCooldownTime;
+        _slideTimer = 0f;
 
         TryStandUp();
     }
