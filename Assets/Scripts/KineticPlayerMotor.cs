@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -25,6 +26,14 @@ public class KineticPlayerMotor : MonoBehaviour
     [Header("Jump & Gravity")]
     [SerializeField] private float jumpHeight = 1.6f;
     [SerializeField] private float gravityMultiplier = 2f;
+    [Tooltip("Fraction of horizontal speed kept on a normal standing/running jump (0 = none, 1 = keep all).")]
+    [SerializeField, Range(0f, 1f)] private float normalJumpHorizontalRetention = 0.25f;
+    [Tooltip("Maximum horizontal speed allowed on a normal jump after applying retention.")]
+    [SerializeField] private float normalJumpMaxHorizontalSpeed = 6f;
+
+    [Header("Jump Grace (Coyote Time)")]
+    [SerializeField] private float coyoteTime = 0.1f; // 0.1s is a good start
+    private float _coyoteTimer;
 
     [Header("Grounding")]
     [SerializeField] private float groundCheckRadius = 0.3f;
@@ -34,6 +43,7 @@ public class KineticPlayerMotor : MonoBehaviour
     [Header("Look")]
     [SerializeField] private float mouseSensitivity = 2f;
     [SerializeField] private float maxPitch = 89f;
+
 
     private Rigidbody _rb;
     private CapsuleCollider _capsule;
@@ -50,6 +60,7 @@ public class KineticPlayerMotor : MonoBehaviour
     // Ground state
     private bool _isGrounded;
     private Vector3 _groundNormal = Vector3.up;
+
 
     private void Awake()
     {
@@ -144,15 +155,12 @@ public class KineticPlayerMotor : MonoBehaviour
     {
         Vector3 velocity = _rb.linearVelocity;
 
+        UpdateCoyoteTimer(velocity);
+
         if (_isGrounded)
         {
             ApplyGroundFriction(ref velocity);
             GroundMove(ref velocity);
-
-            if (_jumpQueued)
-            {
-                Jump(ref velocity);
-            }
         }
         else
         {
@@ -160,8 +168,39 @@ public class KineticPlayerMotor : MonoBehaviour
             ApplyExtraGravity(ref velocity);
         }
 
+        if (_jumpQueued)
+        {
+            bool canJumpFromGround = _isGrounded;
+            bool canJumpFromCoyote = !_isGrounded && _coyoteTimer > 0f && velocity.y <= 0f;
+
+            if (canJumpFromGround || canJumpFromCoyote)
+            {
+                // normal jump for now (not a slide-jump)
+                Jump(ref velocity, false);
+            }
+        }
+
         _jumpQueued = false;
         _rb.linearVelocity = velocity;
+    }
+
+    private void UpdateCoyoteTimer(Vector3 velocity)
+    {
+        if (_isGrounded && velocity.y <= 0f)
+        {
+            // As long as we are on the ground (and not going up),
+            // keep resetting the grace window.
+            _coyoteTimer = coyoteTime;
+        }
+        else
+        {
+            // Count down when we’re in the air
+            _coyoteTimer -= Time.fixedDeltaTime;
+            if (_coyoteTimer < 0f)
+            {
+                _coyoteTimer = 0f;
+            }
+        }
     }
 
     #region Ground & Air Move
@@ -253,20 +292,45 @@ public class KineticPlayerMotor : MonoBehaviour
 
     #region Jump & Gravity
 
-    private void Jump(ref Vector3 velocity)
+    private void Jump(ref Vector3 velocity, bool preserveHorizontalMomentum)
     {
-        if (!_isGrounded)
-            return;
-
         // Remove any downward velocity before jump
         if (velocity.y < 0f)
             velocity.y = 0f;
 
         float gravity = Physics.gravity.magnitude * gravityMultiplier;
         float jumpVel = Mathf.Sqrt(2f * gravity * jumpHeight);
+
+        // We'll rebuild velocity, so cache horizontal first
+        Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        float horizontalSpeed = horizontal.magnitude;
+
+        // --- Horizontal handling ---
+        if (!preserveHorizontalMomentum)
+        {
+            // Normal jump: bleed off most horizontal speed
+            if (horizontalSpeed > 0.0001f)
+            {
+                float targetSpeed = horizontalSpeed * normalJumpHorizontalRetention;
+
+                // Optional clamp so you can't keep crazy sprint/slide speed by jumping
+                targetSpeed = Mathf.Min(targetSpeed, normalJumpMaxHorizontalSpeed);
+
+                horizontal = horizontal.normalized * targetSpeed;
+            }
+            // If speed is already tiny, we just leave it as-is (effectively zero)
+        }
+        // else:
+        //  Slide-jump case (later): keep full horizontal vector,
+        //  maybe even boost it slightly.
+
+        // --- Rebuild final velocity ---
+        velocity = horizontal;
         velocity.y += jumpVel;
 
+        // We just jumped: no longer grounded and no coyote grace
         _isGrounded = false;
+        _coyoteTimer = 0f;
     }
 
     private void ApplyExtraGravity(ref Vector3 velocity)
