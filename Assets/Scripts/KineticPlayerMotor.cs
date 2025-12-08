@@ -56,6 +56,8 @@ public class KineticPlayerMotor : MonoBehaviour
     [Tooltip("Maximum duration of a slide in seconds.")]
     [SerializeField] private float maxSlideTime = 0.8f;
     private float _slideTimer;
+    [SerializeField] private float slideBufferTime = 0.1f;
+    private float _slideBufferTimer;
 
     [Header("Crouch")]
     [Tooltip("Capsule height multiplier when crouched/ sliding.")]
@@ -173,20 +175,9 @@ public class KineticPlayerMotor : MonoBehaviour
 
         _slideHeld = Input.GetKey(slideKey);
 
-
-        if (_slideHeld)
-        {
-            Debug.Log("Slide/Crouch key held");
-        }
-
-        if (_slideReleased)
-        {
-            Debug.Log("Slide/Crouch key released");
-        }
-
         if (_slidePressed)
         {
-            Debug.Log("Slide/Crouch key pressed");
+            _slideBufferTimer = slideBufferTime;
         }
     }
 
@@ -360,6 +351,15 @@ public class KineticPlayerMotor : MonoBehaviour
 
     private void HandleSlideCrouch(ref Vector3 velocity)
     {
+        if (_slideBufferTimer > 0f)
+        {
+            _slideBufferTimer -= Time.fixedDeltaTime;
+            if (_slideBufferTimer < 0f)
+                _slideBufferTimer = 0f;
+        }
+
+        bool hasBufferedSlide = _slideBufferTimer > 0f;
+
         // Start slide / crouch on key press
         if (_slidePressed)
         {
@@ -384,11 +384,23 @@ public class KineticPlayerMotor : MonoBehaviour
                 StartCrouch();
             }
         }
+        else if (hasBufferedSlide && _isGrounded && !_isSliding)
+        {
+            Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
+            float speed = horizontal.magnitude;
+
+            if (speed >= minSlideSpeed)
+            {
+                StartSlide(ref velocity, horizontal, speed);
+                _slideBufferTimer = 0f; // consume buffer
+            }
+        }
 
         // Try to stand when releasing key (if not sliding)
         if (_slideReleased && !_isSliding)
         {
             TryStandUp();
+            _slideBufferTimer = 0f;
         }
     }
 
