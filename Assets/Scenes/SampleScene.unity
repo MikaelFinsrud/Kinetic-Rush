@@ -968,6 +968,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 13400000, guid: ba196dc474d910a4c84ec1210466f615, type: 2}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideKey
+      value: 113
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: airControl
       value: 1
       objectReference: {fileID: 0}
@@ -980,8 +984,24 @@ PrefabInstance:
       value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideBoost
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: maxAirSpeed
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: maxSlideTime
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: minSlideSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideFriction
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: groundFriction

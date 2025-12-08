@@ -44,6 +44,44 @@ public class KineticPlayerMotor : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 2f;
     [SerializeField] private float maxPitch = 89f;
 
+    [Header("Crouch / Slide Input")]
+    [SerializeField] private KeyCode slideKey = KeyCode.LeftAlt;
+
+    [Header("Slide")]
+    [SerializeField] private float minSlideSpeed = 8f;
+    [Tooltip("Instant speed added along slide direction when slide starts.")]
+    [SerializeField] private float slideBoost = 2f;
+    [Tooltip("How quickly slide slows down. Much lower than ground friction.")]
+    [SerializeField] private float slideFriction = 1f;
+    [Tooltip("Maximum duration of a slide in seconds.")]
+    [SerializeField] private float maxSlideTime = 0.8f;
+    private float _slideTimer;
+
+    [Header("Crouch")]
+    [Tooltip("Capsule height multiplier when crouched/ sliding.")]
+    [SerializeField] private float crouchHeightMultiplier = 0.5f;
+    [Tooltip("Ground move speed multiplier while crouched (not sliding).")]
+    [SerializeField] private float crouchSpeedMultiplier = 0.5f;
+    [Tooltip("Ground acceleration multiplier while crouched (not sliding).")]
+    [SerializeField] private float crouchAccelerationMultiplier = 0.7f;
+
+    // State
+    private bool _isCrouching;
+    private bool _isSliding;
+    private Vector3 _slideDirection;
+
+    // input state
+    private bool _slidePressed;
+    private bool _slideHeld;
+    private bool _slideReleased;
+
+    // standing / crouched collider data
+    private float _standingHeight;
+    private Vector3 _standingCenter;
+    private float _crouchedHeight;
+    private Vector3 _crouchedCenter;
+
+
 
     private Rigidbody _rb;
     private CapsuleCollider _capsule;
@@ -71,6 +109,15 @@ public class KineticPlayerMotor : MonoBehaviour
         _rb.freezeRotation = true;   // we rotate via script
 
         _yaw = transform.eulerAngles.y;
+
+        _standingHeight = _capsule.height;
+        _standingCenter = _capsule.center;
+
+        _crouchedHeight = _standingHeight * crouchHeightMultiplier;
+
+        // shift center down so feet stay at the same place
+        _crouchedCenter = _standingCenter;
+        _crouchedCenter.y -= (_standingHeight - _crouchedHeight) * 0.5f;
     }
 
     private void Start()
@@ -87,13 +134,13 @@ public class KineticPlayerMotor : MonoBehaviour
     {
         ReadInput();
         HandleLook();
-        HandleJumpQueue();
     }
 
     private void FixedUpdate()
     {
         CheckGround();
         ApplyMovement();
+        ClearInput();
     }
 
     private void ReadInput()
@@ -108,6 +155,46 @@ public class KineticPlayerMotor : MonoBehaviour
             Input.GetAxis("Mouse X"),
             Input.GetAxis("Mouse Y")
         );
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            _jumpQueued = true;
+        }
+
+        if (Input.GetKeyDown(slideKey))
+        {
+            _slidePressed = true;
+        }
+
+        if (Input.GetKeyUp(slideKey))
+        {
+            _slideReleased = true;
+        }
+
+        _slideHeld = Input.GetKey(slideKey);
+
+
+        if (_slideHeld)
+        {
+            Debug.Log("Slide/Crouch key held");
+        }
+
+        if (_slideReleased)
+        {
+            Debug.Log("Slide/Crouch key released");
+        }
+
+        if (_slidePressed)
+        {
+            Debug.Log("Slide/Crouch key pressed");
+        }
+    }
+
+    private void ClearInput()
+    {
+        _slidePressed = false;
+        _slideReleased = false;
+        _jumpQueued = false;
     }
 
     private void HandleLook()
@@ -123,14 +210,6 @@ public class KineticPlayerMotor : MonoBehaviour
         if (cameraRoot != null)
         {
             cameraRoot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
-        }
-    }
-
-    private void HandleJumpQueue()
-    {
-        if (Input.GetButtonDown("Jump"))
-        {
-            _jumpQueued = true;
         }
     }
 
@@ -157,10 +236,19 @@ public class KineticPlayerMotor : MonoBehaviour
 
         UpdateCoyoteTimer(velocity);
 
+        HandleSlideCrouch(ref velocity);
+
         if (_isGrounded)
         {
-            ApplyGroundFriction(ref velocity);
-            GroundMove(ref velocity);
+            if (_isSliding)
+            {
+                SlideMove(ref velocity); // no normal ground friction
+            }
+            else
+            {
+                ApplyGroundFriction(ref velocity);
+                GroundMove(ref velocity);
+            }
         }
         else
         {
@@ -175,13 +263,186 @@ public class KineticPlayerMotor : MonoBehaviour
 
             if (canJumpFromGround || canJumpFromCoyote)
             {
-                // normal jump for now (not a slide-jump)
-                Jump(ref velocity, false);
+                bool slideJump = _isSliding;
+                Jump(ref velocity, slideJump);
+
+                if (_isSliding)
+                {
+                    // slide cancelled by jump
+                    _isSliding = false;
+                    // try to stand up after leaving ground; if there’s a low ceiling we stay crouched
+                    TryStandUp();
+                }
             }
         }
 
-        _jumpQueued = false;
+        // Slide auto-stop conditions (after movement/jump)
+        if (_isSliding)
+        {
+            _slideTimer -= Time.fixedDeltaTime;
+
+            Vector3 horiz = Vector3.ProjectOnPlane(velocity, Vector3.up);
+            float speed = horiz.magnitude;
+
+            // slideHeld: from your input (Alt) – pass into ApplyMovement/FixedUpdate as we discussed
+            bool timeUp = _slideTimer <= 0f;
+            bool releasedKey = !_slideHeld;
+            bool leftGround = !_isGrounded;
+            bool speedTooLow = speed < minSlideSpeed * 0.5f;
+
+            if (timeUp || releasedKey || leftGround || speedTooLow)
+            {
+                StopSlide();
+            }
+        }
+
         _rb.linearVelocity = velocity;
+    }
+
+    private void TryStandUp()
+    {
+        // Check if there is room to stand
+        float radius = _capsule.radius;
+        float height = _standingHeight;
+
+        Vector3 center = transform.TransformPoint(_standingCenter);
+        Vector3 up = transform.up;
+
+        float halfHeight = height * 0.5f;
+        Vector3 top = center + up * (halfHeight - radius);
+        Vector3 bottom = center - up * (halfHeight - radius);
+
+        bool blocked = Physics.CheckCapsule(
+            top,
+            bottom,
+            radius * 0.95f,
+            groundLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
+        if (!blocked)
+        {
+            _isCrouching = false;
+            _capsule.height = _standingHeight;
+            _capsule.center = _standingCenter;
+        }
+        else
+        {
+            _isCrouching = true; // stay crouched
+            _capsule.height = _crouchedHeight;
+            _capsule.center = _crouchedCenter;
+        }
+    }
+
+    private void SlideMove(ref Vector3 velocity)
+    {
+        // Only affect horizontal
+        Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        float speed = horizontal.magnitude;
+
+        if (speed > 0.0001f)
+        {
+            // Keep sliding mostly along stored slide direction
+            Vector3 dir = _slideDirection.sqrMagnitude > 0.0001f
+                ? _slideDirection
+                : horizontal.normalized;
+
+            horizontal = dir * speed;
+
+            // Apply small slide friction (much lower than groundFriction)
+            float drop = slideFriction * Time.fixedDeltaTime;
+            float newSpeed = Mathf.Max(speed - drop, 0f);
+            horizontal = dir * newSpeed;
+        }
+
+        velocity = new Vector3(horizontal.x, velocity.y, horizontal.z);
+    }
+
+    private void HandleSlideCrouch(ref Vector3 velocity)
+    {
+        // Start slide / crouch on key press
+        if (_slidePressed)
+        {
+            Debug.Log("Start sliding");
+            if (_isGrounded)
+            {
+                Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
+                float speed = horizontal.magnitude;
+
+                if (speed >= minSlideSpeed)
+                {
+                    StartSlide(ref velocity, horizontal, speed);
+                }
+                else
+                {
+                    StartCrouch();
+                }
+            }
+            else
+            {
+                // In air: just crouch (no slide)
+                StartCrouch();
+            }
+        }
+
+        // Try to stand when releasing key (if not sliding)
+        if (_slideReleased && !_isSliding)
+        {
+            TryStandUp();
+        }
+    }
+
+    private void StartCrouch()
+    {
+        if (_isCrouching) return;
+
+        _isCrouching = true;
+        _capsule.height = _crouchedHeight;
+        _capsule.center = _crouchedCenter;
+    }
+
+    private void StartSlide(ref Vector3 velocity, Vector3 horizontalVelocity, float speed)
+    {
+        if (_isSliding) return;
+
+        _isSliding = true;
+        _slideTimer = maxSlideTime; 
+
+        //Adjust capsule height
+        if (!_isCrouching)
+            StartCrouch();
+
+        // Slide direction from current movement, fallback to input
+        if (horizontalVelocity.sqrMagnitude > 0.0001f)
+        {
+            _slideDirection = horizontalVelocity.normalized;
+        }
+        else
+        {
+            Vector3 wishDir = GetWishDirectionOnPlane(_groundNormal);
+            _slideDirection = wishDir.sqrMagnitude > 0.0001f
+                ? wishDir
+                : transform.forward;
+        }
+
+        float targetSpeed = Mathf.Max(speed + slideBoost, minSlideSpeed);
+        Vector3 newHorizontal = _slideDirection * targetSpeed;
+
+        velocity = new Vector3(newHorizontal.x, velocity.y, newHorizontal.z);
+    }
+
+    private void StopSlide()
+    {
+        _isSliding = false;
+
+        if (_slideHeld)
+        {
+
+        }
+        else
+        {
+            TryStandUp();
+        }
     }
 
     private void UpdateCoyoteTimer(Vector3 velocity)
@@ -210,6 +471,15 @@ public class KineticPlayerMotor : MonoBehaviour
         Vector3 wishDir = GetWishDirectionOnPlane(_groundNormal);
         if (wishDir.sqrMagnitude < 0.0001f)
             return;
+
+        float maxSpeed = maxGroundSpeed;
+        float accel = groundAcceleration;
+
+        if (_isCrouching && !_isSliding)
+        {
+            maxSpeed *= crouchSpeedMultiplier;
+            accel *= crouchAccelerationMultiplier;
+        }
 
         Accelerate(ref velocity, wishDir, maxGroundSpeed, groundAcceleration);
     }
