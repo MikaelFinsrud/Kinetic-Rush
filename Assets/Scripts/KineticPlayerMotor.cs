@@ -51,6 +51,8 @@ public class KineticPlayerMotor : MonoBehaviour
     [SerializeField] private float minSlideSpeed = 8f;
     [Tooltip("Instant speed added along slide direction when slide starts.")]
     [SerializeField] private float slideBoost = 2f;
+    [Tooltip("If your current speed is above this, slide gives no extra boost.")]
+    [SerializeField] private float slideBoostSpeedThreshold = 16f;
     [Tooltip("How quickly slide slows down. Much lower than ground friction.")]
     [SerializeField] private float slideFriction = 1f;
     [Tooltip("Maximum duration of a slide in seconds.")]
@@ -437,9 +439,18 @@ public class KineticPlayerMotor : MonoBehaviour
                 : transform.forward;
         }
 
-        float targetSpeed = Mathf.Max(speed + slideBoost, minSlideSpeed);
-        Vector3 newHorizontal = _slideDirection * targetSpeed;
+        // Decide target speed
+        float targetSpeed = speed;
 
+        // Only give a boost if we are below the threshold
+        if (speed < slideBoostSpeedThreshold)
+        {
+            targetSpeed = Mathf.Max(speed + slideBoost, minSlideSpeed);
+            targetSpeed = Mathf.Min(targetSpeed, slideBoostSpeedThreshold);
+        }
+        // else: already fast enough, keep current speed (no extra boost)
+
+        Vector3 newHorizontal = _slideDirection * targetSpeed;
         velocity = new Vector3(newHorizontal.x, velocity.y, newHorizontal.z);
     }
 
