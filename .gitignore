@@ -1,0 +1,30 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Oo]bj/
+[Mm]emoryCaptures/
+[Bb]uild*/**
+
+# IDE-specific
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.user
+*.unityproj
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Crash & profiler files
+sysinfo.txt
+*.pidb
+*.userprefs
+
+# Rider / JetBrains
+*.sln.iml
