@@ -69,6 +69,20 @@ public class KineticPlayerMotor : MonoBehaviour
     [Tooltip("Ground acceleration multiplier while crouched (not sliding).")]
     [SerializeField] private float crouchAccelerationMultiplier = 0.7f;
 
+    [Header("Crouch / Slide Camera")]
+    [Tooltip("How far to move the camera down when crouched (local Y). Negative value.")]
+    [SerializeField] private float crouchCameraHeightOffset = -0.6f;
+    [Tooltip("How far to move the camera down when sliding (local Y). Negative value.")]
+    [SerializeField] private float slideCameraHeightOffset = -0.8f;
+    [Tooltip("How fast the camera moves between standing and crouched height.")]
+    [SerializeField] private float cameraCrouchLerpSpeed = 12f;
+
+    // internal camera height state
+    private float _standingCamLocalY;
+    private float _crouchedCamLocalY;
+    private float _slideCamLocalY;
+    private float _targetCamLocalY;
+
     // State
     private bool _isCrouching;
     private bool _isSliding;
@@ -122,6 +136,14 @@ public class KineticPlayerMotor : MonoBehaviour
         // shift center down so feet stay at the same place
         _crouchedCenter = _standingCenter;
         _crouchedCenter.y -= (_standingHeight - _crouchedHeight) * 0.5f;
+
+        if (cameraRoot != null)
+        {
+            _standingCamLocalY = cameraRoot.localPosition.y;
+            _crouchedCamLocalY = _standingCamLocalY + crouchCameraHeightOffset;
+            _slideCamLocalY = _standingCamLocalY + slideCameraHeightOffset;
+            _targetCamLocalY = _standingCamLocalY;
+        }
     }
 
     private void Start()
@@ -145,6 +167,11 @@ public class KineticPlayerMotor : MonoBehaviour
         CheckGround();
         ApplyMovement();
         ClearInput();
+    }
+
+    private void LateUpdate()
+    {
+        UpdateCameraHeight();
     }
 
     private void ReadInput()
@@ -318,12 +345,16 @@ public class KineticPlayerMotor : MonoBehaviour
             _isCrouching = false;
             _capsule.height = _standingHeight;
             _capsule.center = _standingCenter;
+
+            SetCrouchedCamera(false, false);
         }
         else
         {
             _isCrouching = true; // stay crouched
             _capsule.height = _crouchedHeight;
             _capsule.center = _crouchedCenter;
+
+            SetCrouchedCamera(true, false);
         }
     }
 
@@ -377,13 +408,13 @@ public class KineticPlayerMotor : MonoBehaviour
                 }
                 else
                 {
-                    StartCrouch();
+                    StartCrouch(false);
                 }
             }
             else
             {
                 // In air: just crouch (no slide)
-                StartCrouch();
+                StartCrouch(false);
             }
         }
         else if (hasBufferedSlide && _isGrounded && !_isSliding)
@@ -406,13 +437,15 @@ public class KineticPlayerMotor : MonoBehaviour
         }
     }
 
-    private void StartCrouch()
+    private void StartCrouch(bool slide)
     {
         if (_isCrouching) return;
 
         _isCrouching = true;
         _capsule.height = _crouchedHeight;
         _capsule.center = _crouchedCenter;
+
+        SetCrouchedCamera(!slide, slide);
     }
 
     private void StartSlide(ref Vector3 velocity, Vector3 horizontalVelocity, float speed)
@@ -420,11 +453,17 @@ public class KineticPlayerMotor : MonoBehaviour
         if (_isSliding) return;
 
         _isSliding = true;
-        _slideTimer = maxSlideTime; 
+        _slideTimer = maxSlideTime;
 
         //Adjust capsule height
-        if (!_isCrouching)
-            StartCrouch();
+        if (!_isCrouching) 
+        {
+            StartCrouch(true);
+        }
+        else
+        {
+            SetCrouchedCamera(false, true);
+        }
 
         // Slide direction from current movement, fallback to input
         if (horizontalVelocity.sqrMagnitude > 0.0001f)
@@ -458,14 +497,7 @@ public class KineticPlayerMotor : MonoBehaviour
     {
         _isSliding = false;
 
-        if (_slideHeld)
-        {
-
-        }
-        else
-        {
-            TryStandUp();
-        }
+        TryStandUp();
     }
 
     private void UpdateCoyoteTimer(Vector3 velocity)
@@ -653,5 +685,41 @@ public class KineticPlayerMotor : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;   // free
         Cursor.visible = true;                    // show cursor
+    }
+
+    private void SetCrouchedCamera(bool crouched, bool slide)
+    {
+        if (cameraRoot == null) return;
+
+        if (crouched)
+        {
+            _targetCamLocalY = _crouchedCamLocalY;
+        }
+        else if (slide)
+        {
+            _targetCamLocalY = _slideCamLocalY;
+        }
+        else
+        {
+            _targetCamLocalY = _standingCamLocalY;
+        }  
+    }
+
+    private void UpdateCameraHeight()
+    {
+        if (cameraRoot == null) return;
+
+        Vector3 localPos = cameraRoot.localPosition;
+        float currentY = localPos.y;
+        float targetY = _targetCamLocalY;
+
+        if (Mathf.Approximately(currentY, targetY))
+            return;
+
+        float t = Time.deltaTime * cameraCrouchLerpSpeed;
+        float newY = Mathf.Lerp(currentY, targetY, t);
+
+        localPos.y = newY;
+        cameraRoot.localPosition = localPos;
     }
 }
