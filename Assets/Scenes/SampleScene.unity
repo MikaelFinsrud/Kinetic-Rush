@@ -770,7 +770,7 @@ RectTransform:
   m_GameObject: {fileID: 1041253619}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.14, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.03, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1819759906}
@@ -845,7 +845,7 @@ RectTransform:
   m_GameObject: {fileID: 1106756723}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.14, z: 1}
+  m_LocalScale: {x: 0.03, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1819759906}
@@ -920,7 +920,7 @@ RectTransform:
   m_GameObject: {fileID: 1358734353}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.05, y: 0.14, z: 1}
+  m_LocalScale: {x: 0.03, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1819759906}
@@ -995,7 +995,7 @@ RectTransform:
   m_GameObject: {fileID: 1395778007}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.14, y: 0.05, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.03, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1819759906}
@@ -1699,9 +1699,14 @@ MonoBehaviour:
   interactableMask:
     serializedVersion: 2
     m_Bits: 384
+  environmentMask:
+    serializedVersion: 2
+    m_Bits: 8
   maxRange: 30
-  baseImpulseStrength: 20
-  continuousAccelStrength: 10
+  anchorCheckRadius: 0.3
+  anchorCheckDistance: 0.1
+  baseImpulseStrength: 10
+  continuousAccelStrength: 15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerPushPull : MonoBehaviour
@@ -7,9 +7,12 @@ public class PlayerPushPull : MonoBehaviour
     [SerializeField] private Rigidbody playerRb;
     [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask interactableMask;
+    [SerializeField] private LayerMask environmentMask;   // ground, walls, etc.
 
     [Header("General")]
     [SerializeField] private float maxRange = 30f;
+    [SerializeField] private float anchorCheckRadius = 0.3f;
+    [SerializeField] private float anchorCheckDistance = 0.1f;
 
     [Header("Impulse (on button down)")]
     [SerializeField] private float baseImpulseStrength = 25f;
@@ -24,8 +27,9 @@ public class PlayerPushPull : MonoBehaviour
     bool _pullPressedThisFrame;
 
     // Cached hit target each physics step.
-    PushPullTarget _currentTarget;
-    RaycastHit _currentHit;
+    private PushPullTarget _currentTarget;
+    private RaycastHit _currentHit;
+    private Vector3 _currentTargetOrigin;
 
     private void Reset()
     {
@@ -69,10 +73,22 @@ public class PlayerPushPull : MonoBehaviour
 
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
-        if (Physics.Raycast(ray, out var hit, maxRange, interactableMask, QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(ray, out var hit, maxRange, interactableMask))
         {
             _currentHit = hit;
             _currentTarget = hit.collider.GetComponentInParent<PushPullTarget>();
+            // Find a collider to get a reasonable origin (center of the object).
+
+            if (_currentTarget != null)
+            {
+                Collider col = _currentTarget.GetComponentInChildren<Collider>();
+
+                if (col != null)
+                {
+                    _currentTargetOrigin = col.bounds.center;
+                }
+            }
+            
         }
     }
 
@@ -88,7 +104,7 @@ public class PlayerPushPull : MonoBehaviour
             return;
 
         // Direction from player to target in world space.
-        Vector3 toTarget = (_currentHit.point - playerRb.worldCenterOfMass);
+        Vector3 toTarget = (_currentTargetOrigin - playerRb.worldCenterOfMass);
         if (toTarget.sqrMagnitude < 0.0001f)
             return;
 
@@ -97,25 +113,25 @@ public class PlayerPushPull : MonoBehaviour
         // Impulse on button down.
         if (_pushPressedThisFrame)
         {
-            ApplyImpulse(_currentTarget, dir, isPull: false);
+            ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
         }
         if (_pullPressedThisFrame)
         {
-            ApplyImpulse(_currentTarget, dir, isPull: true);
+            ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
         }
 
         // Continuous small force while held.
         if (_pushHeld)
         {
-            ApplyContinuousForce(_currentTarget, dir, isPull: false);
+            ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
         }
         if (_pullHeld)
         {
-            ApplyContinuousForce(_currentTarget, dir, isPull: true);
+            ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
         }
     }
 
-    private void ApplyImpulse(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull)
+    private void ApplyForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull, float forceStrength, ForceMode forceMode)
     {
         Vector3 playerDir = isPull ? dirPlayerToTarget : -dirPlayerToTarget;
         Vector3 targetDir = isPull ? -dirPlayerToTarget : dirPlayerToTarget;
@@ -124,19 +140,19 @@ public class PlayerPushPull : MonoBehaviour
         float mTarget = target.InteractionMass;
 
         // Special rule: free coin -> only coin moves.
-        if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored)
+        if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored && target.Body != null)
         {
-            if (target.Body != null)
-            {
-                target.Body.AddForce(targetDir * baseImpulseStrength, ForceMode.Impulse);
-            }
+            target.Body.AddForce(targetDir * forceStrength, forceMode);
+            
             return;
         }
 
+        bool anchoredForThisInteraction = target.IsAnchored || float.IsPositiveInfinity(mTarget) || IsTargetBlocked(target, targetDir);
+
         // Anchored targets: only move the player.
-        if (float.IsPositiveInfinity(mTarget) || target.IsAnchored)
+        if (anchoredForThisInteraction)
         {
-            playerRb.AddForce(playerDir * baseImpulseStrength, ForceMode.Impulse);
+            playerRb.AddForce(playerDir * forceStrength, forceMode);
             return;
         }
 
@@ -144,51 +160,58 @@ public class PlayerPushPull : MonoBehaviour
         float kPlayer = mTarget / (mPlayer + mTarget);
         float kTarget = mPlayer / (mPlayer + mTarget);
 
-        Vector3 playerImpulse = playerDir * baseImpulseStrength * kPlayer;
-        Vector3 targetImpulse = targetDir * baseImpulseStrength * kTarget;
+        Vector3 playerImpulse = playerDir * forceStrength * kPlayer;
+        Vector3 targetImpulse = targetDir * forceStrength * kTarget;
 
-        playerRb.AddForce(playerImpulse, ForceMode.Impulse);
+        playerRb.AddForce(playerImpulse, forceMode);
 
         if (target.Body != null)
-            target.Body.AddForce(targetImpulse, ForceMode.Impulse);
+            target.Body.AddForce(targetImpulse, forceMode);
     }
 
-    private void ApplyContinuousForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull)
+    private bool IsTargetBlocked(PushPullTarget target, Vector3 targetDir)
     {
-        Vector3 playerDir = isPull ? dirPlayerToTarget : -dirPlayerToTarget;
-        Vector3 targetDir = isPull ? -dirPlayerToTarget : dirPlayerToTarget;
+        if (target == null)
+            return false;
 
-        float mPlayer = playerRb.mass;
-        float mTarget = target.InteractionMass;
+        Vector3 dir = targetDir.normalized;
+        if (dir.sqrMagnitude < 0.0001f)
+            return false;
 
-        // Free coin: only coin moves.
-        if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored)
+        if (_currentTargetOrigin == null) { return false; }
+
+        // Long ray forward: from target towards environment
+        if (!Physics.Raycast(_currentTargetOrigin,
+                             dir,
+                             out RaycastHit envHit,
+                             100f,
+                             environmentMask,
+                             QueryTriggerInteraction.Ignore))
         {
-            if (target.Body != null)
-            {
-                target.Body.AddForce(targetDir * continuousAccelStrength, ForceMode.Acceleration);
-            }
-            return;
+            // No environment in this direction at all.
+            return false;
         }
 
-        // Anchored: only move player.
-        if (float.IsPositiveInfinity(mTarget) || target.IsAnchored)
+        // Ray back from environment towards targets, but only a *short* distance
+        // Start slightly "inside" the gap towards the target so we don't sit exactly on the environment plane.
+        const float skin = 0.02f;
+        Vector3 backOrigin = envHit.point + dir * skin;
+        float backDistance = anchorCheckDistance + skin;
+
+        if (Physics.Raycast(backOrigin,
+                            -dir,
+                            out RaycastHit backHit,
+                            backDistance,
+                            interactableMask,
+                            QueryTriggerInteraction.Ignore))
         {
-            playerRb.AddForce(playerDir * continuousAccelStrength, ForceMode.Acceleration);
-            return;
+            return true;
         }
 
-        float kPlayer = mTarget / (mPlayer + mTarget);
-        float kTarget = mPlayer / (mPlayer + mTarget);
-
-        Vector3 playerAccel = playerDir * continuousAccelStrength * kPlayer;
-        Vector3 targetAccel = targetDir * continuousAccelStrength * kTarget;
-
-        playerRb.AddForce(playerAccel, ForceMode.Acceleration);
-
-        if (target.Body != null)
-            target.Body.AddForce(targetAccel, ForceMode.Acceleration);
+        // Either there was a big gap, or we hit something else, or nothing at all.
+        return false;
     }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
