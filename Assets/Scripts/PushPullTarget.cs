@@ -10,13 +10,14 @@ public class PushPullTarget : MonoBehaviour
 
     [Header("Push/Pull Settings")]
     [SerializeField] private TargetKind kind = TargetKind.Generic;
-
+    [SerializeField] private float impulseCooldown = 0.25f;
     // "Interaction mass" used for how much this influences vs is influenced by the player.
     // If zero/negative, we fall back to Rigidbody.mass.
     [SerializeField] private float interactionMass = 50f;
-
     // When anchored, we treat this as effectively infinite mass (world-attached).
     [SerializeField] private bool anchored = false;
+
+    private float _nextImpulseTime;
 
     public TargetKind Kind => kind;
     public bool IsAnchored => anchored;
@@ -38,6 +39,13 @@ public class PushPullTarget : MonoBehaviour
 
             return 50f;
         }
+    }
+
+    public bool CanReceiveImpulse => Time.time >= _nextImpulseTime;
+
+    public void RegisterImpulse()
+    {
+        _nextImpulseTime = Time.time + impulseCooldown;
     }
 
     private void Awake()

@@ -110,24 +110,31 @@ public class PlayerPushPull : MonoBehaviour
 
         Vector3 dir = toTarget.normalized;
 
-        // Impulse on button down.
-        if (_pushPressedThisFrame)
+        if (_currentTarget.CanReceiveImpulse)
         {
-            ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
-        }
-        if (_pullPressedThisFrame)
-        {
-            ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
+            // Impulse on button down.
+            if (_pushPressedThisFrame)
+            {
+                ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
+                _currentTarget.RegisterImpulse();
+            }
+            if (_pullPressedThisFrame)
+            {
+                ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
+                _currentTarget.RegisterImpulse();
+            }
         }
 
         // Continuous small force while held.
         if (_pushHeld)
         {
             ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
+            _currentTarget.RegisterImpulse();
         }
         if (_pullHeld)
         {
             ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
+            _currentTarget.RegisterImpulse();
         }
     }
 
