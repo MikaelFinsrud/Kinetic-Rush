@@ -426,8 +426,7 @@ public class KineticPlayerMotor : MonoBehaviour
             }
             else
             {
-                // In air: just crouch (no slide)
-                StartCrouch(false);
+
             }
         }
         else if (hasBufferedSlide && _isGrounded && !_isSliding && !slideOnCooldown)

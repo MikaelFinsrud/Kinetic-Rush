@@ -1904,7 +1904,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: maxRange
-      value: 17
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: playerCamera
@@ -1912,11 +1912,11 @@ PrefabInstance:
       objectReference: {fileID: 330585545}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: baseImpulseStrength
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: pushPullSoftCapSpeed
-      value: 12
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: minPushPullMultiplier
@@ -1925,6 +1925,30 @@ PrefabInstance:
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: upwardPushPullMultiplier
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: maxAirSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: maxSlideTime
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: airAcceleration
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideCooldownTime
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: cameraCrouchLerpSpeed
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideCameraHeightOffset
+      value: -0.85
       objectReference: {fileID: 0}
     - target: {fileID: 8172613441284298179, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: m_Name
