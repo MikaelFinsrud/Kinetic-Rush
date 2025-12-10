@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 2622056009189611534}
   - component: {fileID: 4383603817661801086}
   - component: {fileID: 6686463362321193023}
-  m_Layer: 0
+  - component: {fileID: 6090003253690619173}
+  m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45,7 +46,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -69,7 +70,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8172613441284298179}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ba196dc474d910a4c84ec1210466f615, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -97,6 +98,67 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e8505df9a597f14eaf15f9ca8285477, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KineticPlayerMotor
+  cameraRoot: {fileID: 2697527386892271151}
+  maxGroundSpeed: 6
+  groundAcceleration: 60
+  groundFriction: 40
+  maxAirSpeed: 2
+  airAcceleration: 5
+  airControl: 5
+  jumpHeight: 1.6
+  gravityMultiplier: 2.5
+  normalJumpHorizontalRetention: 0.25
+  normalJumpMaxHorizontalSpeed: 6
+  coyoteTime: 0.15
+  groundCheckRadius: 0.2
+  groundCheckDistance: 0.85
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 136
+  mouseSensitivity: 2
+  maxPitch: 89
+  slideKey: 113
+  minSlideSpeed: 4
+  slideBoost: 3
+  slideBoostSpeedThreshold: 16
+  slideFriction: 5
+  maxSlideTime: 0.5
+  slideBufferTime: 0.2
+  slideCooldownTime: 0.2
+  crouchHeightMultiplier: 0.5
+  crouchSpeedMultiplier: 0.3
+  crouchAccelerationMultiplier: 0.7
+  crouchCameraHeightOffset: -0.6
+  slideCameraHeightOffset: -0.9
+  cameraCrouchLerpSpeed: 10
+--- !u!114 &6090003253690619173
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d65c65e7f663e2428ca8e2b7031a1b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPushPull
+  playerRb: {fileID: 2622056009189611534}
+  playerCamera: {fileID: 0}
+  interactableMask:
+    serializedVersion: 2
+    m_Bits: 384
+  environmentMask:
+    serializedVersion: 2
+    m_Bits: 8
+  maxRange: 30
+  anchorCheckRadius: 0.3
+  anchorCheckDistance: 0.1
+  baseImpulseStrength: 10
+  continuousAccelStrength: 30
+  upwardPushPullMultiplier: 2
+  pushPullSoftCapSpeed: 10
+  minPushPullMultiplier: 0.1
 --- !u!1 &8905555139089722089
 GameObject:
   m_ObjectHideFlags: 0
@@ -106,7 +168,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2697527386892271151}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PlayerCameraRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}

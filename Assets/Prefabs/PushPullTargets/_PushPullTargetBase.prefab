@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PushPullTarget
   kind: 0
-  impulseCooldown: 0.4
+  impulseCooldown: 0.8
   interactionMass: 1
   anchored: 1
 --- !u!65 &-6064507801221457777

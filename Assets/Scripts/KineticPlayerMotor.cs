@@ -566,17 +566,27 @@ public class KineticPlayerMotor : MonoBehaviour
         // Simple "air control" � allows redirecting more when already moving
         if (airControl > 0f)
         {
-            float speed = velocity.magnitude;
-            if (speed > 0.1f)
+            // Split velocity into vertical and horizontal
+            Vector3 vertical = Vector3.Project(velocity, Vector3.up);
+            Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up); // XZ only
+
+            float hSpeed = horizontal.magnitude;
+            if (hSpeed > 0.1f)
             {
-                float dot = Vector3.Dot(velocity.normalized, wishDir);
+                Vector3 hDir = horizontal.normalized;
+                float dot = Vector3.Dot(hDir, wishDir);               // alignment in plane
                 float controlAmount = airControl * dot * Time.fixedDeltaTime;
+
                 if (controlAmount > 0f)
                 {
-                    Vector3 newDir = (velocity.normalized + wishDir * controlAmount).normalized;
-                    velocity = newDir * speed;
+                    // Bend horizontal direction only, preserve horizontal speed
+                    Vector3 newHDir = (hDir + wishDir * controlAmount).normalized;
+                    horizontal = newHDir * hSpeed;
                 }
             }
+
+            // Recombine horizontal + vertical
+            velocity = horizontal + vertical;
         }
     }
 
