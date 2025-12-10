@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerPushPull : MonoBehaviour
@@ -36,6 +38,8 @@ public class PlayerPushPull : MonoBehaviour
 
     // Cached hit target each physics step.
     private PushPullTarget _currentTarget;
+    private PushPullTarget _lastTarget;
+
     private RaycastHit _currentHit;
     private Vector3 _currentTargetOrigin;
 
@@ -73,6 +77,8 @@ public class PlayerPushPull : MonoBehaviour
 
     private void UpdateTargetFromCamera()
     {
+        _lastTarget = _currentTarget;
+
         _currentTarget = null;
         _currentHit = default;
 
@@ -96,7 +102,21 @@ public class PlayerPushPull : MonoBehaviour
                     _currentTargetOrigin = col.bounds.center;
                 }
             }
-            
+        }
+
+        if (_currentTarget != null && _currentTarget != _lastTarget)
+        {
+            if (_lastTarget != null)
+            {
+                _lastTarget.Untarget();
+            }
+
+            _currentTarget.Target();
+        }
+
+        if (_currentTarget == null && _lastTarget != null)
+        {
+            _lastTarget.Untarget();
         }
     }
 
@@ -124,12 +144,12 @@ public class PlayerPushPull : MonoBehaviour
             if (_pushPressedThisFrame)
             {
                 ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
-                _currentTarget.RegisterImpulse();
+                _currentTarget.RegisterImpulse(true);
             }
             if (_pullPressedThisFrame)
             {
                 ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
-                _currentTarget.RegisterImpulse();
+                _currentTarget.RegisterImpulse(false);
             }
         }
 
@@ -137,12 +157,13 @@ public class PlayerPushPull : MonoBehaviour
         if (_pushHeld)
         {
             ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
-            _currentTarget.RegisterImpulse();
+            _currentTarget.RegisterImpulse(true);
+
         }
         if (_pullHeld)
         {
             ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
-            _currentTarget.RegisterImpulse();
+            _currentTarget.RegisterImpulse(false);
         }
     }
 

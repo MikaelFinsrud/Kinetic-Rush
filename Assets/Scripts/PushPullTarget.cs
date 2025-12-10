@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PushPullTarget : MonoBehaviour
@@ -24,6 +25,11 @@ public class PushPullTarget : MonoBehaviour
 
     public Rigidbody Body { get; private set; }
 
+    public event Action OnHighlighted;
+    public event Action OnUnHighlighted;
+    public event Action OnPushed;
+    public event Action OnPulled;
+
     public float InteractionMass
     {
         get
@@ -43,9 +49,29 @@ public class PushPullTarget : MonoBehaviour
 
     public bool CanReceiveImpulse => Time.time >= _nextImpulseTime;
 
-    public void RegisterImpulse()
+    public void RegisterImpulse(bool isPush)
     {
         _nextImpulseTime = Time.time + impulseCooldown;
+
+        if (isPush)
+        {
+            OnPushed?.Invoke();
+
+        }
+        else
+        {
+            OnPulled?.Invoke();
+        }
+    }
+
+    public void Target()
+    {
+        OnHighlighted?.Invoke();
+    }
+
+    public void Untarget()
+    {
+        OnUnHighlighted?.Invoke();
     }
 
     private void Awake()
