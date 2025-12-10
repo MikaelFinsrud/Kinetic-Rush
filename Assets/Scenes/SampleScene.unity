@@ -2340,7 +2340,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: pushPullSoftCapSpeed
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: minPushPullMultiplier
@@ -2349,6 +2349,10 @@ PrefabInstance:
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: upwardPushPullMultiplier
       value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: slideBoost
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: maxAirSpeed
