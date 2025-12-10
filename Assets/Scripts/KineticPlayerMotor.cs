@@ -599,8 +599,12 @@ public class KineticPlayerMotor : MonoBehaviour
     {
         float currentSpeed = Vector3.Dot(velocity, wishDir);
         float addSpeed = maxSpeed - currentSpeed;
-        if (addSpeed <= 0f)
+
+        if (addSpeed <= 0f) 
+        {
+            Debug.Log("No speed to add");
             return;
+        }
 
         float accelSpeed = accel * Time.fixedDeltaTime * maxSpeed;
         if (accelSpeed > addSpeed)

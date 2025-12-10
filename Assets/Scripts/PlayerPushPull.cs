@@ -20,6 +20,14 @@ public class PlayerPushPull : MonoBehaviour
     [Header("Continuous Force (while holding)")]
     [SerializeField] private float continuousAccelStrength = 20f;
 
+    [Header("Push/Pull Diminishing Returns")]
+   
+    [Header("Push/Pull Tuning")]
+    [SerializeField] private float upwardPushPullMultiplier = 1.5f; // 1 = normal, <1 = weaker up, >1 = stronger up
+    [SerializeField] private float pushPullSoftCapSpeed = 20f;      // speed along the force dir where we start heavily diminishing
+    [SerializeField] private float minPushPullMultiplier = 0.15f;   // never scale below this
+
+
     // Input buffer flags (Update -> FixedUpdate).
     bool _pushHeld;
     bool _pullHeld;
@@ -140,8 +148,18 @@ public class PlayerPushPull : MonoBehaviour
 
     private void ApplyForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull, float forceStrength, ForceMode forceMode)
     {
+
         Vector3 playerDir = isPull ? dirPlayerToTarget : -dirPlayerToTarget;
         Vector3 targetDir = isPull ? -dirPlayerToTarget : dirPlayerToTarget;
+
+        Vector3 playerImpulse = playerDir * forceStrength;
+
+        playerImpulse = ApplyPerAxisDiminishing(playerImpulse);
+
+        if (playerImpulse.y > 0f)
+        {
+            playerImpulse.y *= upwardPushPullMultiplier;
+        }
 
         float mPlayer = playerRb.mass;
         float mTarget = target.InteractionMass;
@@ -159,7 +177,7 @@ public class PlayerPushPull : MonoBehaviour
         // Anchored targets: only move the player.
         if (anchoredForThisInteraction)
         {
-            playerRb.AddForce(playerDir * forceStrength, forceMode);
+            playerRb.AddForce(playerImpulse, forceMode);
             return;
         }
 
@@ -167,7 +185,7 @@ public class PlayerPushPull : MonoBehaviour
         float kPlayer = mTarget / (mPlayer + mTarget);
         float kTarget = mPlayer / (mPlayer + mTarget);
 
-        Vector3 playerImpulse = playerDir * forceStrength * kPlayer;
+        playerImpulse = playerImpulse * kPlayer;
         Vector3 targetImpulse = targetDir * forceStrength * kTarget;
 
         playerRb.AddForce(playerImpulse, forceMode);
@@ -218,6 +236,43 @@ public class PlayerPushPull : MonoBehaviour
         // Either there was a big gap, or we hit something else, or nothing at all.
         return false;
     }
+
+    private float ApplyAxisSoftCap(float forceAxis, float velocityAxis)
+    {
+        // No force on this axis? Nothing to do.
+        if (Mathf.Approximately(forceAxis, 0f))
+            return forceAxis;
+
+        // If we're not already moving in the SAME direction on this axis, don't diminish:
+        // - v == 0  -> full force (we're starting movement)
+        // - opposite sign -> full force (we're braking/turning)
+        if (Mathf.Sign(forceAxis) != Mathf.Sign(velocityAxis) || velocityAxis == 0f)
+            return forceAxis;
+
+        float speed = Mathf.Abs(velocityAxis);
+
+        // 0..1 where 1 means we've reached or exceeded the soft cap on this axis
+        float t = Mathf.Clamp01(speed / pushPullSoftCapSpeed);
+
+        // Smooth curve: gentle reduction at low speed, stronger near cap
+        t = t * t;
+
+        float multiplier = Mathf.Lerp(1f, minPushPullMultiplier, t);
+        return forceAxis * multiplier;
+    }
+
+    private Vector3 ApplyPerAxisDiminishing(Vector3 playerForce)
+    {
+        Vector3 v = playerRb.linearVelocity;
+
+        playerForce.x = ApplyAxisSoftCap(playerForce.x, v.x);
+        playerForce.y = ApplyAxisSoftCap(playerForce.y, v.y);
+        playerForce.z = ApplyAxisSoftCap(playerForce.z, v.z);
+
+        return playerForce;
+    }
+
+
 
 
 #if UNITY_EDITOR
