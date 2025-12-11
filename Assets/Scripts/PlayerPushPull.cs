@@ -31,10 +31,12 @@ public class PlayerPushPull : MonoBehaviour
 
 
     // Input buffer flags (Update -> FixedUpdate).
-    bool _pushHeld;
-    bool _pullHeld;
-    bool _pushPressedThisFrame;
-    bool _pullPressedThisFrame;
+    private bool _pushHeld;
+    private bool _pullHeld;
+    private bool _pushPressedThisFrame;
+    private bool _pullPressedThisFrame;
+    private bool _isPushing;
+    private bool _isPulling;
 
     // Cached hit target each physics step.
     private PushPullTarget _currentTarget;
@@ -42,6 +44,12 @@ public class PlayerPushPull : MonoBehaviour
 
     private RaycastHit _currentHit;
     private Vector3 _currentTargetOrigin;
+
+
+    public event Action<bool> OnPush;
+    public event Action<bool> OnPull;
+    public event Action OnStopPush;
+    public event Action OnStopPull;
 
     private void Reset()
     {
@@ -63,6 +71,18 @@ public class PlayerPushPull : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
             _pullPressedThisFrame = true;
+
+        if (_isPulling && !_pullHeld && !_pullPressedThisFrame)
+        {
+            _isPulling = false;
+            OnStopPull?.Invoke();
+        }
+
+        if (_isPushing && !_pushHeld && !_pushPressedThisFrame)
+        {
+            _isPushing = false;
+            OnStopPush?.Invoke();
+        }
     }
 
     private void FixedUpdate()
@@ -143,11 +163,15 @@ public class PlayerPushPull : MonoBehaviour
             // Impulse on button down.
             if (_pushPressedThisFrame)
             {
+                OnPush?.Invoke(true);
+                _isPushing = true;
                 ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
                 _currentTarget.RegisterImpulse(true);
             }
             if (_pullPressedThisFrame)
             {
+                _isPulling = true;
+                OnPull?.Invoke(true);
                 ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
                 _currentTarget.RegisterImpulse(false);
             }
@@ -156,12 +180,24 @@ public class PlayerPushPull : MonoBehaviour
         // Continuous small force while held.
         if (_pushHeld)
         {
+            if (!_isPushing)
+            {
+                _isPushing = true;
+                OnPush?.Invoke(false);
+            }
+
             ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(true);
 
         }
         if (_pullHeld)
         {
+            if (!_isPulling)
+            {
+                _isPulling = true;
+                OnPull?.Invoke(false);
+            }
+
             ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(false);
         }
