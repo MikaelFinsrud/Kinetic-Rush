@@ -1139,6 +1139,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2118600161}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &830381891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 830381892}
+  m_Layer: 6
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &830381892
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 830381891}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.3299328, y: 0.18315908, z: 0.0654182, w: 0.92375195}
+  m_LocalPosition: {x: -0.275, y: -0.194, z: 0.138}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2215363383462014955}
+  m_LocalEulerAnglesHint: {x: -39.31, y: 22.43, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1785,6 +1816,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1249557376}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1326718696 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8172613441284298179, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+  m_PrefabInstance: {fileID: 2215363383462014954}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1358734353
 GameObject:
   m_ObjectHideFlags: 0
@@ -2743,8 +2779,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2697527386892271151, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 830381892}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8172613441284298179, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2215363383462014961}
   m_SourcePrefab: {fileID: 100100000, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
 --- !u!4 &2215363383462014955 stripped
 Transform:
@@ -2756,12 +2798,36 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
   m_PrefabInstance: {fileID: 2215363383462014954}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1326718696}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d65c65e7f663e2428ca8e2b7031a1b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPushPull
+--- !u!54 &2215363383462014960 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 2622056009189611534, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+  m_PrefabInstance: {fileID: 2215363383462014954}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2215363383462014961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1326718696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360f81bdaff680941a04aa2f36e05105, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CoinShooter
+  _muzzle: {fileID: 830381892}
+  _coinPrefab: {fileID: 6210927313602842254, guid: 03d8405679ba71f46b509ca3aeccf192, type: 3}
+  _playerColliders: []
+  _playerRigidbody: {fileID: 2215363383462014960}
+  shootKey: 101
+  _shootSpeed: 5
+  _shootCooldown: 0.15
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

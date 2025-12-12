@@ -144,15 +144,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPushPull
   playerRb: {fileID: 2622056009189611534}
-  playerCamera: {fileID: 0}
   interactableMask:
     serializedVersion: 2
-    m_Bits: 384
+    m_Bits: 896
   environmentMask:
     serializedVersion: 2
     m_Bits: 8
   maxRange: 30
-  anchorCheckRadius: 0.3
   anchorCheckDistance: 0.1
   baseImpulseStrength: 10
   continuousAccelStrength: 30
