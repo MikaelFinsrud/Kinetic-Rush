@@ -10,6 +10,8 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class KineticPlayerMotor : MonoBehaviour
 {
+    public static KineticPlayerMotor Instance { get; private set; }
+
     [Header("References")]
     [SerializeField] private Transform cameraRoot; // assign PlayerCameraRoot in inspector
 
@@ -122,6 +124,15 @@ public class KineticPlayerMotor : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogError("KineticPlayerMotor already exists!.");
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
+
+
         _rb = GetComponent<Rigidbody>();
         _capsule = GetComponent<CapsuleCollider>();
 

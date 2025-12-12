@@ -5,15 +5,15 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerPushPull : MonoBehaviour
 {
+    public static PlayerPushPull Instance { get; private set; }
+
     [Header("References")]
     [SerializeField] private Rigidbody playerRb;
-    [SerializeField] private Camera playerCamera;
     [SerializeField] private LayerMask interactableMask;
     [SerializeField] private LayerMask environmentMask;   // ground, walls, etc.
 
     [Header("General")]
     [SerializeField] private float maxRange = 30f;
-    [SerializeField] private float anchorCheckRadius = 0.3f;
     [SerializeField] private float anchorCheckDistance = 0.1f;
 
     [Header("Impulse (on button down)")]
@@ -22,13 +22,13 @@ public class PlayerPushPull : MonoBehaviour
     [Header("Continuous Force (while holding)")]
     [SerializeField] private float continuousAccelStrength = 20f;
 
-    [Header("Push/Pull Diminishing Returns")]
-   
     [Header("Push/Pull Tuning")]
     [SerializeField] private float upwardPushPullMultiplier = 1.5f; // 1 = normal, <1 = weaker up, >1 = stronger up
     [SerializeField] private float pushPullSoftCapSpeed = 20f;      // speed along the force dir where we start heavily diminishing
     [SerializeField] private float minPushPullMultiplier = 0.15f;   // never scale below this
 
+
+    private Camera _playerCamera;
 
     // Input buffer flags (Update -> FixedUpdate).
     private bool _pushHeld;
@@ -51,12 +51,29 @@ public class PlayerPushPull : MonoBehaviour
     public event Action OnStopPush;
     public event Action OnStopPull;
 
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogError("PlayerPushPull already exists!.");
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
+
+        if (_playerCamera == null)
+        {
+            _playerCamera = Camera.main;
+        }
+    }
+
     private void Reset()
     {
         playerRb = GetComponent<Rigidbody>();
-        if (playerCamera == null)
+        if (_playerCamera == null)
         {
-            playerCamera = Camera.main;
+            _playerCamera = Camera.main;
         }
     }
 
@@ -71,28 +88,64 @@ public class PlayerPushPull : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1))
             _pullPressedThisFrame = true;
-
-        if (_isPulling && !_pullHeld && !_pullPressedThisFrame)
-        {
-            _isPulling = false;
-            OnStopPull?.Invoke();
-        }
-
-        if (_isPushing && !_pushHeld && !_pushPressedThisFrame)
-        {
-            _isPushing = false;
-            OnStopPush?.Invoke();
-        }
     }
 
     private void FixedUpdate()
     {
         UpdateTargetFromCamera();
+        HandleStopPushPulling();
         HandlePushPull();
 
         // Clear one-frame input flags.
         _pushPressedThisFrame = false;
         _pullPressedThisFrame = false;
+    }
+
+    private void HandleStopPushPulling()
+    {
+        if (_isPulling && !_pullHeld && !_pullPressedThisFrame)
+        {
+            StopPulling();
+        }
+
+        if (_isPushing && !_pushHeld && !_pushPressedThisFrame)
+        {
+            StopPushing();
+        }
+
+        if ((_isPulling || _isPushing) && _currentTarget == null)
+        {
+            if (_isPulling)
+            {
+                StopPulling();
+            }
+            if (_isPushing)
+            {
+                StopPushing();
+            }
+        }
+    }
+
+    private void StopPulling()
+    {
+        _isPulling = false;
+        OnStopPull?.Invoke();
+
+        if (_currentTarget != null)
+        {
+            _currentTarget.SetAnchored(false);
+        }
+    }
+
+    private void StopPushing()
+    {
+        _isPushing = false;
+        OnStopPush?.Invoke();
+
+        if (_currentTarget != null)
+        {
+            _currentTarget.SetAnchored(false);
+        }
     }
 
     private void UpdateTargetFromCamera()
@@ -102,10 +155,10 @@ public class PlayerPushPull : MonoBehaviour
         _currentTarget = null;
         _currentHit = default;
 
-        if (playerCamera == null)
+        if (_playerCamera == null)
             return;
 
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        Ray ray = new Ray(_playerCamera.transform.position, _playerCamera.transform.forward);
 
         if (Physics.Raycast(ray, out var hit, maxRange, interactableMask))
         {
@@ -218,8 +271,15 @@ public class PlayerPushPull : MonoBehaviour
             playerImpulse.y *= upwardPushPullMultiplier;
         }
 
-        float mPlayer = playerRb.mass;
-        float mTarget = target.InteractionMass;
+        if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && !target.IsAnchored && IsTargetBlocked(target, targetDir))
+        {
+            target.SetAnchored(true);
+        }
+
+        if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && target.IsAnchored && !IsTargetBlocked(target, targetDir))
+        {
+            target.SetAnchored(false);
+        }
 
         // Special rule: free coin -> only coin moves.
         if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored && target.Body != null)
@@ -229,7 +289,10 @@ public class PlayerPushPull : MonoBehaviour
             return;
         }
 
-        bool anchoredForThisInteraction = target.IsAnchored || float.IsPositiveInfinity(mTarget) || IsTargetBlocked(target, targetDir);
+        float mPlayer = playerRb.mass;
+        float mTarget = target.InteractionMass;
+
+        bool anchoredForThisInteraction = float.IsPositiveInfinity(mTarget);
 
         // Anchored targets: only move the player.
         if (anchoredForThisInteraction)
@@ -335,11 +398,11 @@ public class PlayerPushPull : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (playerCamera == null) return;
+        if (_playerCamera == null) return;
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(playerCamera.transform.position,
-                        playerCamera.transform.position + playerCamera.transform.forward * maxRange);
+        Gizmos.DrawLine(_playerCamera.transform.position,
+                        _playerCamera.transform.position + _playerCamera.transform.forward * maxRange);
     }
 #endif
 }
