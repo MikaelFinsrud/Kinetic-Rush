@@ -6,6 +6,9 @@ public sealed class Coin : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private Rigidbody _rb;
 
+    [Header("Tuning")]
+    [SerializeField] private float gravityMultiplier = 2f;
+
     private void Awake()
     {
         GetComponent<AudioSource>().pitch = Random.Range(0.75f, 0.9f);
@@ -14,6 +17,13 @@ public sealed class Coin : MonoBehaviour
     private void Reset()
     {
         _rb = GetComponent<Rigidbody>();
+    }
+
+    private void FixedUpdate()
+    {
+        Vector3 velocity = _rb.linearVelocity;
+        ApplyExtraGravity(ref velocity);
+        _rb.linearVelocity = velocity;
     }
 
     private void OnCollisionEnter(Collision c)
@@ -40,5 +50,11 @@ public sealed class Coin : MonoBehaviour
 
         _rb.angularVelocity = Vector3.zero;
         transform.rotation = delta * transform.rotation;
+    }
+
+    private void ApplyExtraGravity(ref Vector3 velocity)
+    {
+        Vector3 gravity = Physics.gravity * gravityMultiplier;
+        velocity += gravity * Time.fixedDeltaTime;
     }
 }
