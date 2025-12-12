@@ -15,6 +15,8 @@ public sealed class CoinShooter : MonoBehaviour
     [Header("Tuning")]
     [SerializeField] private float _shootSpeed = 35f;
     [SerializeField] private float _shootCooldown = 0.15f;
+    [SerializeField] private float _coinSpinRadPerSec = 20f;
+    [SerializeField] private float yInherit = 0.5f;
 
     private float _nextShotTime;
     private bool _shotQueued = false;
@@ -60,8 +62,9 @@ public sealed class CoinShooter : MonoBehaviour
         if (_playerRigidbody != null) 
         { 
             inherited = _playerRigidbody.GetPointVelocity(_muzzle.position); 
+            inherited = new Vector3(inherited.x, inherited.y * yInherit, inherited.z);
         }
 
-        coin.Launch(inherited + (_muzzle.transform.forward * _shootSpeed), _playerRigidbody);
+        coin.Launch(inherited + (_muzzle.transform.forward * _shootSpeed), _coinSpinRadPerSec, _playerRigidbody);
     }
 }
