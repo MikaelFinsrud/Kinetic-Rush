@@ -216,23 +216,42 @@ public class PlayerPushPull : MonoBehaviour
             // Impulse on button down.
             if (_pushPressedThisFrame)
             {
+                if (_isPulling)
+                {
+                    StopPulling();
+                }
+
                 OnPush?.Invoke(true);
                 _isPushing = true;
                 ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
                 _currentTarget.RegisterImpulse(true);
+
+                return;
             }
             if (_pullPressedThisFrame)
             {
+                if (_isPushing)
+                {
+                    StopPushing();
+                }
+
                 _isPulling = true;
                 OnPull?.Invoke(true);
                 ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
                 _currentTarget.RegisterImpulse(false);
+
+                return;
             }
         }
 
         // Continuous small force while held.
         if (_pushHeld)
         {
+            if (_isPulling)
+            {
+                StopPulling();
+            }
+
             if (!_isPushing)
             {
                 _isPushing = true;
@@ -242,9 +261,15 @@ public class PlayerPushPull : MonoBehaviour
             ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(true);
 
+            return;
         }
         if (_pullHeld)
         {
+            if (_isPushing)
+            {
+                StopPushing();
+            }
+
             if (!_isPulling)
             {
                 _isPulling = true;
@@ -253,6 +278,8 @@ public class PlayerPushPull : MonoBehaviour
 
             ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(false);
+
+            return;
         }
     }
 
