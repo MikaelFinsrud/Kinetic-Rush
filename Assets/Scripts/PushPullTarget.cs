@@ -93,13 +93,16 @@ public class PushPullTarget : MonoBehaviour
 
         if (value && Body != null)
         {
+            Debug.Log($"Anchoring {name}");
             Body.linearVelocity = Vector3.zero;
             Body.angularVelocity = Vector3.zero;
-            Body.isKinematic = true;
+            Body.constraints = RigidbodyConstraints.FreezePosition;
+
         }
         else if (!value && Body != null)
         {
-            Body.isKinematic = false;
+            Debug.Log($"Unanchoring {name}");
+            Body.constraints = RigidbodyConstraints.None;
         }
     }
 

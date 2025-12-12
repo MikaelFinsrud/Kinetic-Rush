@@ -205,11 +205,7 @@ public class PlayerPushPull : MonoBehaviour
             return;
 
         // Direction from player to target in world space.
-        Vector3 toTarget = (_currentTargetOrigin - playerRb.worldCenterOfMass);
-        if (toTarget.sqrMagnitude < 0.0001f)
-            return;
-
-        Vector3 dir = toTarget.normalized;
+        Vector3 dir = CalculateTargetDir(_currentTargetOrigin);
 
         if (_currentTarget.CanReceiveImpulse)
         {
@@ -283,9 +279,9 @@ public class PlayerPushPull : MonoBehaviour
         }
     }
 
-    private void ApplyForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull, float forceStrength, ForceMode forceMode)
+    private void ApplyForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull, float forceStrength, ForceMode forceMode, bool onlyPlayer = false)
     {
-
+        Debug.Log($"ApplyForce: target={target.name}, isPull={isPull}, strength={forceStrength}, mode={forceMode}, onlyPlayer={onlyPlayer}");
         Vector3 playerDir = isPull ? dirPlayerToTarget : -dirPlayerToTarget;
         Vector3 targetDir = isPull ? -dirPlayerToTarget : dirPlayerToTarget;
 
@@ -298,9 +294,16 @@ public class PlayerPushPull : MonoBehaviour
             playerImpulse.y *= upwardPushPullMultiplier;
         }
 
+        if (onlyPlayer)
+        {
+            AddForcePlayer(playerImpulse, forceMode);
+            return;
+        }
+
         if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && !target.IsAnchored && IsTargetBlocked(target, targetDir))
         {
             target.SetAnchored(true);
+            Debug.Log("Set target anchored!");
         }
 
         if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && target.IsAnchored && !IsTargetBlocked(target, targetDir))
@@ -311,8 +314,10 @@ public class PlayerPushPull : MonoBehaviour
         // Special rule: free coin -> only coin moves.
         if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored && target.Body != null)
         {
-            target.Body.AddForce(targetDir * forceStrength, forceMode);
-            
+            Debug.Log("Add force!");
+            Vector3 coinDir = isPull ? targetDir : _playerCamera.transform.forward;
+            target.Body.AddForce(coinDir * forceStrength, forceMode);
+
             return;
         }
 
@@ -324,7 +329,7 @@ public class PlayerPushPull : MonoBehaviour
         // Anchored targets: only move the player.
         if (anchoredForThisInteraction)
         {
-            playerRb.AddForce(playerImpulse, forceMode);
+            AddForcePlayer(playerImpulse, forceMode);
             return;
         }
 
@@ -335,10 +340,46 @@ public class PlayerPushPull : MonoBehaviour
         playerImpulse = playerImpulse * kPlayer;
         Vector3 targetImpulse = targetDir * forceStrength * kTarget;
 
-        playerRb.AddForce(playerImpulse, forceMode);
+        AddForcePlayer(playerImpulse, forceMode);
 
         if (target.Body != null)
+        {
             target.Body.AddForce(targetImpulse, forceMode);
+            Debug.Log("Add force to target!");
+        }
+    }
+
+    private Vector3 CalculateTargetDir(Vector3 targetOrigin)
+    {
+        Vector3 toTarget = (targetOrigin - playerRb.worldCenterOfMass);
+
+        Vector3 dir = toTarget.normalized;
+
+        return dir;
+    }
+
+    private void AddForcePlayer(Vector3 playerImpulse, ForceMode forceMode)
+    {
+        playerRb.AddForce(playerImpulse, forceMode);
+    }
+
+    public void ImpulseBackToPlayer(PushPullTarget target)
+    {
+        Collider col = target.GetComponentInChildren<Collider>();
+        Vector3 targetOrigin = Vector3.zero;
+        Vector3 dir = Vector3.zero;
+
+        if (col != null)
+        {
+            targetOrigin = col.bounds.center;
+            dir = CalculateTargetDir(targetOrigin);
+        }
+        else
+        {
+            return;
+        }
+
+        ApplyForce(target, dir, false, baseImpulseStrength, ForceMode.Impulse, true);
     }
 
     private bool IsTargetBlocked(PushPullTarget target, Vector3 targetDir)
@@ -418,9 +459,6 @@ public class PlayerPushPull : MonoBehaviour
 
         return playerForce;
     }
-
-
-
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()

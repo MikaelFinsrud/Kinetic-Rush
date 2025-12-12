@@ -89,8 +89,12 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8057229856458436616, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
+      propertyPath: impulseCooldown
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8057229856458436616, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
       propertyPath: interactionMass
-      value: 0.15
+      value: 0.01
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -115,6 +119,17 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 6091859093467559444}
   m_SourcePrefab: {fileID: 100100000, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
+--- !u!114 &4383341947354454739 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8057229856458436616, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
+  m_PrefabInstance: {fileID: 5982404951668812507}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8897984970231399771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7df2c85df6ed634dafa81f4a407ef90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PushPullTarget
 --- !u!1 &8897984970231399771 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2917835255709282176, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
@@ -185,7 +200,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8897984970231399771}
   serializedVersion: 5
-  m_Mass: 0.15
+  m_Mass: 0.05
   m_LinearDamping: 0.3
   m_AngularDamping: 1
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -199,7 +214,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -238,7 +253,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   _rb: {fileID: -5450756094213351018}
+  _pushPullTarget: {fileID: 4383341947354454739}
   gravityMultiplier: 2.5
+  impulseBackToPlayerBuffer: 0.25
 --- !u!82 &6091859093467559444
 AudioSource:
   m_ObjectHideFlags: 0

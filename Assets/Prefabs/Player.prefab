@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4383603817661801086}
   - component: {fileID: 6686463362321193023}
   - component: {fileID: 6090003253690619173}
+  - component: {fileID: 7066648615307067331}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -102,8 +103,8 @@ MonoBehaviour:
   maxGroundSpeed: 6
   groundAcceleration: 60
   groundFriction: 40
-  maxAirSpeed: 2
-  airAcceleration: 5
+  maxAirSpeed: 4
+  airAcceleration: 6
   airControl: 5
   jumpHeight: 1.6
   gravityMultiplier: 2.5
@@ -119,18 +120,18 @@ MonoBehaviour:
   maxPitch: 89
   slideKey: 113
   minSlideSpeed: 4
-  slideBoost: 3
+  slideBoost: 5
   slideBoostSpeedThreshold: 16
   slideFriction: 5
-  maxSlideTime: 0.5
-  slideBufferTime: 0.2
-  slideCooldownTime: 0.2
+  maxSlideTime: 0.6
+  slideBufferTime: 0.5
+  slideCooldownTime: 0.1
   crouchHeightMultiplier: 0.5
   crouchSpeedMultiplier: 0.3
   crouchAccelerationMultiplier: 0.7
   crouchCameraHeightOffset: -0.6
-  slideCameraHeightOffset: -0.9
-  cameraCrouchLerpSpeed: 10
+  slideCameraHeightOffset: -0.85
+  cameraCrouchLerpSpeed: 25
 --- !u!114 &6090003253690619173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,12 +152,64 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   maxRange: 30
-  anchorCheckDistance: 0.1
-  baseImpulseStrength: 10
+  anchorCheckDistance: 0.3
+  baseImpulseStrength: 15
   continuousAccelStrength: 30
-  upwardPushPullMultiplier: 2
-  pushPullSoftCapSpeed: 10
-  minPushPullMultiplier: 0.1
+  upwardPushPullMultiplier: 1.5
+  pushPullSoftCapSpeed: 20
+  minPushPullMultiplier: 0.15
+--- !u!114 &7066648615307067331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360f81bdaff680941a04aa2f36e05105, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CoinShooter
+  _muzzle: {fileID: 5027840929388055027}
+  _coinPrefab: {fileID: 6210927313602842254, guid: 03d8405679ba71f46b509ca3aeccf192, type: 3}
+  _playerColliders: []
+  _playerRigidbody: {fileID: 2622056009189611534}
+  shootKey: 101
+  _shootSpeed: 6
+  _shootCooldown: 0.15
+  _coinSpinRadPerSec: 15
+  yInherit: 1
+--- !u!1 &8584362997911149289
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5027840929388055027}
+  m_Layer: 6
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5027840929388055027
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8584362997911149289}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.29854104, y: 0, z: 0, w: 0.9543968}
+  m_LocalPosition: {x: 0, y: -0.082, z: 0.137}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2697527386892271151}
+  m_LocalEulerAnglesHint: {x: -34.74, y: 0, z: 0}
 --- !u!1 &8905555139089722089
 GameObject:
   m_ObjectHideFlags: 0
@@ -185,6 +238,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5027840929388055027}
   m_Father: {fileID: 3813150127385458910}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

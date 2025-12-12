@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -5,13 +6,23 @@ public sealed class Coin : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private Rigidbody _rb;
+    [SerializeField] private PushPullTarget _pushPullTarget;
 
     [Header("Tuning")]
     [SerializeField] private float gravityMultiplier = 2f;
+    [SerializeField] private float impulseBackToPlayerBuffer = 0.2f;
+
+    private float _noImpulseBackToPlayerTime;
+    private bool canImpulseBackToPlayer = false;
 
     private void Awake()
     {
         GetComponent<AudioSource>().pitch = Random.Range(0.75f, 0.9f);
+    }
+
+    private void Start()
+    {
+        _pushPullTarget.OnPushed += HandleImpulse;
     }
 
     private void Reset()
@@ -30,15 +41,19 @@ public sealed class Coin : MonoBehaviour
     {
         // Take first contact (you can average normals if you want)
         AlignFlatToSurfaceNormal(c.GetContact(0).normal);
+
+        if (canImpulseBackToPlayer && Time.time <= _noImpulseBackToPlayerTime)
+        {
+            ImpulseBackToPlayer();
+            canImpulseBackToPlayer = false;
+        }
     }
 
     public void Launch(Vector3 velocity, float spinRadPerSec, Rigidbody launchParent)
     {
-        _rb.isKinematic = false;
-        _rb.useGravity = true;
         _rb.linearVelocity = velocity;
         _rb.maxAngularVelocity = 70f;
-        _rb.angularVelocity = transform.right * spinRadPerSec;
+        _rb.angularVelocity = transform.forward * spinRadPerSec;
     }
 
     public void AlignFlatToSurfaceNormal(Vector3 surfaceNormal)
@@ -56,5 +71,20 @@ public sealed class Coin : MonoBehaviour
     {
         Vector3 gravity = Physics.gravity * gravityMultiplier;
         velocity += gravity * Time.fixedDeltaTime;
+    }
+
+    private void HandleImpulse()
+    {
+        _noImpulseBackToPlayerTime = Time.time + impulseBackToPlayerBuffer;
+        canImpulseBackToPlayer = true;
+    }
+
+    private void ImpulseBackToPlayer()
+    {
+        if (PlayerPushPull.Instance != null)
+        {
+            Debug.Log("Coin Impulse Back To Player");
+            PlayerPushPull.Instance.ImpulseBackToPlayer(_pushPullTarget);
+        }
     }
 }
