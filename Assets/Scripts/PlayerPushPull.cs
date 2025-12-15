@@ -303,7 +303,6 @@ public class PlayerPushPull : MonoBehaviour
         if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && !target.IsAnchored && IsTargetBlocked(target, targetDir))
         {
             target.SetAnchored(true);
-            Debug.Log("Set target anchored!");
         }
 
         if (target.Kind != PushPullTarget.TargetKind.GenericAlwaysAnchored && target.IsAnchored && !IsTargetBlocked(target, targetDir))

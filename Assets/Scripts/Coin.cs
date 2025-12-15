@@ -14,6 +14,7 @@ public sealed class Coin : MonoBehaviour
 
     private float _noImpulseBackToPlayerTime;
     private bool canImpulseBackToPlayer = false;
+    public bool isAttached = false;
 
     private void Awake()
     {
@@ -51,9 +52,10 @@ public sealed class Coin : MonoBehaviour
 
     public void Launch(Vector3 velocity, float spinRadPerSec, Rigidbody launchParent)
     {
+        transform.parent = null;
         _rb.linearVelocity = velocity;
         _rb.maxAngularVelocity = 70f;
-        _rb.angularVelocity = transform.forward * spinRadPerSec;
+        _rb.angularVelocity = transform.right * spinRadPerSec;
     }
 
     public void AlignFlatToSurfaceNormal(Vector3 surfaceNormal)
@@ -77,6 +79,19 @@ public sealed class Coin : MonoBehaviour
     {
         _noImpulseBackToPlayerTime = Time.time + impulseBackToPlayerBuffer;
         canImpulseBackToPlayer = true;
+    }
+
+    private void Detach() 
+    {
+        transform.parent = null;
+        _rb.constraints = RigidbodyConstraints.None;
+        isAttached = false;
+    }
+
+    public void Attach()
+    {
+        _rb.constraints = RigidbodyConstraints.FreezePosition;
+        isAttached = true;
     }
 
     private void ImpulseBackToPlayer()

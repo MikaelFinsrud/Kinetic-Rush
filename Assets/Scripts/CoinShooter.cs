@@ -56,6 +56,7 @@ public sealed class CoinShooter : MonoBehaviour
         _nextShotTime = Time.time + _shootCooldown;
 
         var coin = Instantiate(_coinPrefab, _muzzle.position, Quaternion.identity);
+        coin.transform.forward = _muzzle.forward;
         _currentCoin = coin;
 
         Vector3 inherited = Vector3.zero;
