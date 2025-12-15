@@ -9,6 +9,7 @@ public class PlayerPushPull : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private Rigidbody playerRb;
+    [SerializeField] private PlayerEnergy energy;
     [SerializeField] private LayerMask interactableMask;
     [SerializeField] private LayerMask environmentMask;   // ground, walls, etc.
 
@@ -18,9 +19,11 @@ public class PlayerPushPull : MonoBehaviour
 
     [Header("Impulse (on button down)")]
     [SerializeField] private float baseImpulseStrength = 25f;
+    [Min(0f)][SerializeField] private float _bigImpulseCost = 20f;
 
     [Header("Continuous Force (while holding)")]
     [SerializeField] private float continuousAccelStrength = 20f;
+    [Min(0f)][SerializeField] private float _continuousCostPerSecond = 12f;
 
     [Header("Push/Pull Tuning")]
     [SerializeField] private float upwardPushPullMultiplier = 1.5f; // 1 = normal, <1 = weaker up, >1 = stronger up
@@ -62,12 +65,16 @@ public class PlayerPushPull : MonoBehaviour
             Destroy(this.gameObject);
             return;
         }
+
         Instance = this;
 
         if (_playerCamera == null)
         {
             _playerCamera = Camera.main;
         }
+
+        if (energy == null) energy = GetComponentInParent<PlayerEnergy>();
+        if (energy == null) Debug.LogError("Missing PlayerEnergy reference.", this);
     }
 
     private void Reset()
@@ -254,7 +261,7 @@ public class PlayerPushPull : MonoBehaviour
         // Direction from player to target in world space.
         Vector3 dir = CalculateTargetDir(_currentTargetOrigin);
 
-        if (_currentTarget.CanReceiveImpulse)
+        if (_currentTarget.CanReceiveImpulse && energy.TrySpendInstant(_bigImpulseCost))
         {
             // Impulse on button down.
             if (_pushPressedThisFrame)
@@ -295,22 +302,49 @@ public class PlayerPushPull : MonoBehaviour
                 StopPulling();
             }
 
+            float fraction = energy.SpendContinuous(_continuousCostPerSecond, Time.fixedDeltaTime);
+
+            if (fraction <= 0f)
+            {
+                // Not enough energy to continue.
+                if (_isPushing)
+                {
+                    StopPushing();
+                }
+
+                return;
+            }
+
             if (!_isPushing)
             {
                 _isPushing = true;
                 OnPush?.Invoke(false);
             }
 
-            ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength, ForceMode.Acceleration);
+            ApplyForce(_currentTarget, dir, isPull: false, continuousAccelStrength * fraction, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(true);
 
             return;
         }
+
         if (_pullHeld)
         {
             if (_isPushing)
             {
                 StopPushing();
+            }
+
+            float fraction = energy.SpendContinuous(_continuousCostPerSecond, Time.fixedDeltaTime);
+
+            if (fraction <= 0f)
+            {
+                // Not enough energy to continue.
+                if (_isPulling)
+                {
+                    StopPulling();
+                }
+
+                return;
             }
 
             if (!_isPulling)
@@ -319,7 +353,7 @@ public class PlayerPushPull : MonoBehaviour
                 OnPull?.Invoke(false);
             }
 
-            ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength, ForceMode.Acceleration);
+            ApplyForce(_currentTarget, dir, isPull: true, continuousAccelStrength * fraction, ForceMode.Acceleration);
             _currentTarget.RegisterImpulse(false);
 
             return;
