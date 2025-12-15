@@ -42,6 +42,8 @@ public class PlayerPushPull : MonoBehaviour
     private PushPullTarget _currentTarget;
     private PushPullTarget _lastTarget;
 
+    private const int MaxHits = 32;
+    private readonly RaycastHit[] _hits = new RaycastHit[MaxHits];
     private RaycastHit _currentHit;
     private Vector3 _currentTargetOrigin;
 
@@ -148,6 +150,60 @@ public class PlayerPushPull : MonoBehaviour
         }
     }
 
+    public bool TryGetBestTarget(out PushPullTarget best)
+    {
+        best = null;
+
+        Ray ray = new Ray(_playerCamera.transform.position, _playerCamera.transform.forward);
+
+        int count = Physics.RaycastNonAlloc(
+            ray, _hits, maxRange, interactableMask);
+
+        if (count <= 0) return false;
+
+        float bestScore = float.PositiveInfinity;
+
+        for (int i = 0; i < count; i++)
+        {
+            Collider col = _hits[i].collider;
+            if (!col) continue;
+
+            PushPullTarget t = col.GetComponent<PushPullTarget>();
+            if (!t) continue;
+
+            // Pick a representative point on the collider that’s closest to the aim ray
+            Vector3 center = col.bounds.center;
+
+            float depth = Vector3.Dot(center - ray.origin, ray.direction);
+            if (depth < 0f) continue; // behind camera
+
+            Vector3 pointOnRay = ray.origin + ray.direction * Mathf.Clamp(depth, 0f, maxRange);
+
+            // Perpendicular distance from aim ray to the target center
+            Vector3 toPoint = center - ray.origin;
+            float lateralDist = Vector3.Cross(ray.direction, toPoint).magnitude;
+
+            // Small bias toward closer targets so far-away stuff doesn’t “steal” selection
+            float distanceAlongRay = Vector3.Dot(toPoint, ray.direction);
+
+            // Optional: don’t select targets through walls
+            if (Physics.Raycast(ray.origin, (center - ray.origin).normalized,
+                    out RaycastHit blockHit, distanceAlongRay, environmentMask, QueryTriggerInteraction.Ignore))
+            {
+                continue;
+            }
+
+            float score = lateralDist + (distanceAlongRay * 0.01f); // tune the 0.01f
+            if (score < bestScore)
+            {
+                bestScore = score;
+                best = t;
+            }
+        }
+
+        return best != null;
+    }
+
     private void UpdateTargetFromCamera()
     {
         _lastTarget = _currentTarget;
@@ -158,22 +214,13 @@ public class PlayerPushPull : MonoBehaviour
         if (_playerCamera == null)
             return;
 
-        Ray ray = new Ray(_playerCamera.transform.position, _playerCamera.transform.forward);
-
-        if (Physics.Raycast(ray, out var hit, maxRange, interactableMask))
+        if (TryGetBestTarget(out PushPullTarget bestTarget))
         {
-            _currentHit = hit;
-            _currentTarget = hit.collider.GetComponentInParent<PushPullTarget>();
-            // Find a collider to get a reasonable origin (center of the object).
-
-            if (_currentTarget != null)
+            _currentTarget = bestTarget;
+            Collider col = _currentTarget.GetComponentInChildren<Collider>();
+            if (col != null)
             {
-                Collider col = _currentTarget.GetComponentInChildren<Collider>();
-
-                if (col != null)
-                {
-                    _currentTargetOrigin = col.bounds.center;
-                }
+                _currentTargetOrigin = col.bounds.center;
             }
         }
 
