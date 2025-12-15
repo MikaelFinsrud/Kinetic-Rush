@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6686463362321193023}
   - component: {fileID: 6090003253690619173}
   - component: {fileID: 7066648615307067331}
+  - component: {fileID: 6274716231347513315}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -83,7 +84,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.4
+  m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
@@ -102,17 +103,17 @@ MonoBehaviour:
   cameraRoot: {fileID: 2697527386892271151}
   maxGroundSpeed: 6
   groundAcceleration: 60
-  groundFriction: 40
+  groundFriction: 30
   maxAirSpeed: 4
-  airAcceleration: 6
-  airControl: 5
+  airAcceleration: 7
+  airControl: 7
   jumpHeight: 1.6
   gravityMultiplier: 2.5
   normalJumpHorizontalRetention: 0.25
   normalJumpMaxHorizontalSpeed: 6
   coyoteTime: 0.15
-  groundCheckRadius: 0.2
-  groundCheckDistance: 0.85
+  groundCheckRadius: 0.4
+  groundCheckDistance: 0.7
   groundLayers:
     serializedVersion: 2
     m_Bits: 136
@@ -120,9 +121,9 @@ MonoBehaviour:
   maxPitch: 89
   slideKey: 113
   minSlideSpeed: 4
-  slideBoost: 5
+  slideBoost: 6
   slideBoostSpeedThreshold: 16
-  slideFriction: 5
+  slideFriction: 3
   maxSlideTime: 0.6
   slideBufferTime: 0.5
   slideCooldownTime: 0.1
@@ -145,6 +146,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerPushPull
   playerRb: {fileID: 2622056009189611534}
+  energy: {fileID: 6274716231347513315}
   interactableMask:
     serializedVersion: 2
     m_Bits: 896
@@ -154,7 +156,9 @@ MonoBehaviour:
   maxRange: 30
   anchorCheckDistance: 0.3
   baseImpulseStrength: 15
+  _bigImpulseCost: 20
   continuousAccelStrength: 30
+  _continuousCostPerSecond: 20
   upwardPushPullMultiplier: 1.5
   pushPullSoftCapSpeed: 20
   minPushPullMultiplier: 0.15
@@ -171,15 +175,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoinShooter
   _muzzle: {fileID: 0}
-  _holdPos: {fileID: 0}
   _coinPrefab: {fileID: 6210927313602842254, guid: 03d8405679ba71f46b509ca3aeccf192, type: 3}
   _playerColliders: []
   _playerRigidbody: {fileID: 2622056009189611534}
   shootKey: 101
-  _shootSpeed: 6
+  _shootSpeed: 8
   _shootCooldown: 0.15
   _coinSpinRadPerSec: 15
   yInherit: 1
+--- !u!114 &6274716231347513315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b4ffd7fc0c8bed4a956e26f2a676682, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEnergy
+  _settings: {fileID: 11400000, guid: cb940b9d5e74b974aa523af7f83cf8b8, type: 2}
+  _startEnergy: 100
 --- !u!1 &8905555139089722089
 GameObject:
   m_ObjectHideFlags: 0
