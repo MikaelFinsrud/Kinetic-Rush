@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using static PushPullTarget;
 
 public interface IEnergy
 {
@@ -17,7 +18,7 @@ public interface IEnergy
     void BlockRegen(float durationSeconds);
 }
 
-public sealed class PlayerEnergy : MonoBehaviour, IEnergy
+public sealed class PlayerEnergy : MonoBehaviour, IEnergy, IResettable
 {
     public static PlayerEnergy Instance { get; private set; }
 
@@ -54,6 +55,11 @@ public sealed class PlayerEnergy : MonoBehaviour, IEnergy
 
         _current = Mathf.Clamp(_startEnergy, 0f, _settings.maxEnergy);
         RaiseChanged();
+    }
+
+    private void Start()
+    {
+        CaptureInitialState();
     }
 
     private void Update()
@@ -131,5 +137,44 @@ public sealed class PlayerEnergy : MonoBehaviour, IEnergy
     private void RaiseChanged()
     {
         OnEnergyChanged?.Invoke(_current, _settings.maxEnergy);
+    }
+
+
+
+
+
+
+    private State _initial;
+
+    [System.Serializable]
+    private struct State
+    {
+        public float _current;
+        public float _regenResumeAt;
+        public float _regenBlockedUntil;
+        public EnergySettingsSO _settings;
+        public float _startEnergy;
+    }
+
+    public void CaptureInitialState()
+    {
+        _initial = new State
+        {
+            _current = _current,
+            _regenResumeAt = _regenResumeAt,
+            _regenBlockedUntil = _regenBlockedUntil,
+            _settings = _settings,
+            _startEnergy = _startEnergy,
+        };
+    }
+
+    public void RestoreInitialState()
+    {
+        _current = _initial._current;
+        _regenResumeAt = _initial._regenResumeAt;
+        _regenBlockedUntil = _initial._regenBlockedUntil;
+        _settings = _initial._settings;
+        _startEnergy = _initial._startEnergy;
+        RaiseChanged();
     }
 }

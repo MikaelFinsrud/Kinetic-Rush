@@ -1,6 +1,8 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using static PushPullTarget;
+using static UnityEngine.InputManagerEntry;
 
 /// <summary>
 /// Rigidbody-based Quake/CS style controller:
@@ -8,7 +10,7 @@ using UnityEngine;
 /// - World-space velocity (looking around does NOT rotate your velocity)
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
-public class KineticPlayerMotor : MonoBehaviour
+public class KineticPlayerMotor : MonoBehaviour, IResettable
 {
     public static KineticPlayerMotor Instance { get; private set; }
 
@@ -21,6 +23,7 @@ public class KineticPlayerMotor : MonoBehaviour
     [SerializeField] private float groundFriction = 8f;
 
     [SerializeField] private float maxAirSpeed = 10f;
+    [SerializeField] private float airFriction = 8f;
     [SerializeField] private float airAcceleration = 20f;
     [Tooltip("Extra turning power while in air (0 = none, 1-5 = CS-style feel)")]
     [SerializeField] private float airControl = 2f;
@@ -28,6 +31,7 @@ public class KineticPlayerMotor : MonoBehaviour
     [Header("Jump & Gravity")]
     [SerializeField] private float jumpHeight = 1.6f;
     [SerializeField] private float gravityMultiplier = 2f;
+    [SerializeField] private float linearGravityDrag = 0.15f; // try 0.05–0.4
     [Tooltip("Fraction of horizontal speed kept on a normal standing/running jump (0 = none, 1 = keep all).")]
     [SerializeField, Range(0f, 1f)] private float normalJumpHorizontalRetention = 0.25f;
     [Tooltip("Maximum horizontal speed allowed on a normal jump after applying retention.")]
@@ -103,11 +107,6 @@ public class KineticPlayerMotor : MonoBehaviour
     private float _crouchedHeight;
     private Vector3 _crouchedCenter;
 
-
-
-    private Rigidbody _rb;
-    private CapsuleCollider _capsule;
-
     // Input (we use legacy Input for now; easy to swap to the new Input System later)
     private Vector2 _moveInput;
     private Vector2 _lookInput;
@@ -121,7 +120,10 @@ public class KineticPlayerMotor : MonoBehaviour
     private bool _isGrounded;
     private Vector3 _groundNormal = Vector3.up;
 
+    private Rigidbody _rb;
+    private CapsuleCollider _capsule;
 
+    
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -161,6 +163,7 @@ public class KineticPlayerMotor : MonoBehaviour
 
     private void Start()
     {
+        CaptureInitialState();
         LockCursor();
     }
 
@@ -180,6 +183,7 @@ public class KineticPlayerMotor : MonoBehaviour
         CheckGround();
         ApplyMovement();
         ClearInput();
+        Debug.Log($"Velocity: {_rb.linearVelocity.magnitude:F2}");
     }
 
     private void LateUpdate()
@@ -253,13 +257,11 @@ public class KineticPlayerMotor : MonoBehaviour
         {
             _isGrounded = true;
             _groundNormal = hit.normal;
-            Debug.Log("Grounded on normal: " + _groundNormal);
         }
         else
         {
             _isGrounded = false;
             _groundNormal = Vector3.up;
-            Debug.Log("Not grounded!");
         }
     }
 
@@ -296,6 +298,7 @@ public class KineticPlayerMotor : MonoBehaviour
         }
         else
         {
+            ApplyAirFriction(ref velocity);
             AirMove(ref velocity);
             ApplyExtraGravity(ref velocity);
         }
@@ -615,6 +618,21 @@ public class KineticPlayerMotor : MonoBehaviour
         velocity = new Vector3(lateral.x, velocity.y, lateral.z);
     }
 
+    private void ApplyAirFriction(ref Vector3 velocity)
+    {
+        Vector3 lateral = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        float speed = lateral.magnitude;
+        if (speed <= 0.0001f)
+            return;
+
+        float drop = speed / 10 * airFriction * Time.fixedDeltaTime;
+        float newSpeed = Mathf.Max(speed - drop, 0f);
+        lateral *= newSpeed / speed;
+
+        // keep vertical velocity
+        velocity = new Vector3(lateral.x, velocity.y, lateral.z);
+    }
+
     private void Accelerate(ref Vector3 velocity, Vector3 wishDir, float maxSpeed, float accel)
     {
         float currentSpeed = Vector3.Dot(velocity, wishDir);
@@ -622,7 +640,6 @@ public class KineticPlayerMotor : MonoBehaviour
 
         if (addSpeed <= 0f) 
         {
-            Debug.Log("No speed to add");
             return;
         }
 
@@ -699,8 +716,23 @@ public class KineticPlayerMotor : MonoBehaviour
 
     private void ApplyExtraGravity(ref Vector3 velocity)
     {
-        Vector3 gravity = Physics.gravity * gravityMultiplier;
-        velocity += gravity * Time.fixedDeltaTime;
+        Vector3 g = Physics.gravity * gravityMultiplier;
+        Vector3 gDir = g.normalized;
+
+        float vAlongG = Vector3.Dot(velocity, gDir); // + = falling
+
+        // Only apply drag when moving along gravity (falling)
+        if (vAlongG > 0f)
+        {
+            // Drag acceleration magnitude (linear + quadratic)
+            float dragAcc = (linearGravityDrag * vAlongG);
+
+            // Drag points opposite the fall direction (against gravity direction)
+            velocity += (-gDir * dragAcc) * Time.fixedDeltaTime;
+        }
+
+        // Gravity always applies
+        velocity += g * Time.fixedDeltaTime;
     }
 
     #endregion
@@ -760,5 +792,118 @@ public class KineticPlayerMotor : MonoBehaviour
 
         localPos.y = newY;
         cameraRoot.localPosition = localPos;
+    }
+
+
+
+
+
+    private State _initial;
+
+    [System.Serializable]
+    private struct State
+    {
+        public float _coyoteTimer;
+        public float _slideTimer;
+        public float _slideBufferTimer;
+        public float _slideCooldownTimer;
+
+        // internal camera height state
+        public float _standingCamLocalY;
+        public float _crouchedCamLocalY;
+        public float _slideCamLocalY;
+        public float _targetCamLocalY;
+
+        // State
+        public bool _isCrouching;
+        public bool _isSliding;
+        public Vector3 _slideDirection;
+
+        // input state
+        public bool _slidePressed;
+        public bool _slideHeld;
+        public bool _slideReleased;
+
+        // standing / crouched collider data
+        public float _standingHeight;
+        public Vector3 _standingCenter;
+        public float _crouchedHeight;
+        public Vector3 _crouchedCenter;
+
+        // Input (we use legacy Input for now; easy to swap to the new Input System later)
+        public Vector2 _moveInput;
+        public Vector2 _lookInput;
+        public bool _jumpQueued;
+
+        // Look state
+        public float _yaw;
+        public float _pitch;
+
+        // Ground state
+        public bool _isGrounded;
+        public Vector3 _groundNormal;
+    }
+
+    public void CaptureInitialState()
+    {
+        _initial = new State
+        {
+            _coyoteTimer = _coyoteTimer,
+            _slideTimer = _slideTimer,
+            _slideBufferTimer = _slideBufferTimer,
+            _slideCooldownTimer = _slideCooldownTimer,
+            _standingCamLocalY = _standingCamLocalY,
+            _crouchedCamLocalY = _crouchedCamLocalY,
+            _slideCamLocalY = _slideCamLocalY,
+            _targetCamLocalY = _targetCamLocalY,
+            _isCrouching = _isCrouching,
+            _isSliding = _isSliding,
+            _slideDirection = _slideDirection,
+            _slidePressed = _slidePressed,
+            _slideHeld = _slideHeld,
+            _slideReleased = _slideReleased,
+            _standingHeight = _standingHeight,
+            _standingCenter = _standingCenter,
+            _crouchedHeight = _crouchedHeight,
+            _crouchedCenter = _crouchedCenter,
+            _moveInput = _moveInput,
+            _lookInput = _lookInput,
+            _jumpQueued = _jumpQueued,
+            _yaw = _yaw,
+            _pitch = _pitch,
+            _isGrounded = _isGrounded,
+            _groundNormal = _groundNormal
+        };
+    }
+
+    public void RestoreInitialState()
+    {
+        LockCursor();
+
+        _coyoteTimer = _initial._coyoteTimer;
+        _slideTimer = _initial._slideTimer;
+        _slideBufferTimer = _initial._slideBufferTimer;
+        _slideCooldownTimer = _initial._slideCooldownTimer;
+        _standingCamLocalY = _initial._standingCamLocalY;
+        _crouchedCamLocalY = _initial._crouchedCamLocalY;
+        _slideCamLocalY = _initial._slideCamLocalY;
+        _targetCamLocalY = _initial._targetCamLocalY;
+        _isCrouching = _initial._isCrouching;
+        _isSliding = _initial._isSliding;
+        _slideDirection = _initial._slideDirection;
+        _slidePressed = _initial._slidePressed;
+        _slideHeld = _initial._slideHeld;
+        _slideReleased = _initial._slideReleased;
+        _standingHeight = _initial._standingHeight;
+        _standingCenter = _initial._standingCenter;
+        _crouchedHeight = _initial._crouchedHeight;
+        _crouchedCenter = _initial._crouchedCenter;
+        _moveInput = _initial._moveInput;
+        _lookInput = _initial._lookInput;
+        _jumpQueued = _initial._jumpQueued;
+        _yaw = _initial._yaw;
+        _pitch = _initial._pitch;
+        _isGrounded = _initial._isGrounded;
+        _groundNormal = _initial._groundNormal;
     }
 }

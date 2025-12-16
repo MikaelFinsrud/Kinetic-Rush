@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 3126339341611574740}
   - component: {fileID: 3954363731160025518}
   - component: {fileID: 8704805268190661645}
-  m_Layer: 0
+  - component: {fileID: 2141973445835098697}
+  m_Layer: 3
   m_Name: Wall 1x1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,6 +114,19 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2141973445835098697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1546289677449783835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2554373672bc7174990216a4a2bcad16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ContactHazard
+  _cause: 2
 --- !u!1 &1924144930995478629
 GameObject:
   m_ObjectHideFlags: 0
@@ -122,7 +136,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1211268849223197937}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Hazard 1x1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

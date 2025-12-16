@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class CoinShooter : MonoBehaviour
+public sealed class CoinShooter : MonoBehaviour, IResettable
 {
     [Header("Refs")]
     private Camera _cam;
@@ -67,5 +67,16 @@ public sealed class CoinShooter : MonoBehaviour
         }
 
         coin.Launch(inherited + (_muzzle.transform.forward * _shootSpeed), _coinSpinRadPerSec, _playerRigidbody);
+    }
+
+    public void CaptureInitialState()
+    {
+    }
+
+    public void RestoreInitialState()
+    {
+        _nextShotTime = 0f;
+        _shotQueued = false;
+        _currentCoin = null;
     }
 }
