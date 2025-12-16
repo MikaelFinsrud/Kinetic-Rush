@@ -122,7 +122,6 @@ public sealed class SpeedFOVController : MonoBehaviour
             : Mathf.SmoothDamp(_currentFov, targetFov, ref _fovVelocity, smoothTime);
 
         targetCamera.Lens.FieldOfView = _currentFov;
-        Debug.Log(_currentFov);
     }
 
     private Vector3 GetVelocity()

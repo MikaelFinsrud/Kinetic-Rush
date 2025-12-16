@@ -367,7 +367,6 @@ public class PlayerPushPull : MonoBehaviour, IResettable
 
     private void ApplyForce(PushPullTarget target, Vector3 dirPlayerToTarget, bool isPull, float forceStrength, ForceMode forceMode, bool onlyPlayer = false)
     {
-        Debug.Log($"ApplyForce: target={target.name}, isPull={isPull}, strength={forceStrength}, mode={forceMode}, onlyPlayer={onlyPlayer}");
         Vector3 playerDir = isPull ? dirPlayerToTarget : -dirPlayerToTarget;
         Vector3 targetDir = isPull ? -dirPlayerToTarget : dirPlayerToTarget;
 
@@ -399,7 +398,6 @@ public class PlayerPushPull : MonoBehaviour, IResettable
         // Special rule: free coin -> only coin moves.
         if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored && target.Body != null)
         {
-            Debug.Log("Add force!");
             Vector3 coinDir = isPull ? targetDir : _playerCamera.transform.forward;
             target.Body.AddForce(coinDir * forceStrength, forceMode);
 
@@ -430,7 +428,6 @@ public class PlayerPushPull : MonoBehaviour, IResettable
         if (target.Body != null)
         {
             target.Body.AddForce(targetImpulse, forceMode);
-            Debug.Log("Add force to target!");
         }
     }
 

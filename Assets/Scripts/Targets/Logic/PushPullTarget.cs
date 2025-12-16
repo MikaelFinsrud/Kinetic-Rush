@@ -99,7 +99,6 @@ public class PushPullTarget : MonoBehaviour, IResettable
 
         if (value && Body != null)
         {
-            Debug.Log($"Anchoring {name}");
             Body.linearVelocity = Vector3.zero;
             Body.angularVelocity = Vector3.zero;
             Body.constraints = RigidbodyConstraints.FreezePosition;
@@ -107,7 +106,6 @@ public class PushPullTarget : MonoBehaviour, IResettable
         }
         else if (!value && Body != null)
         {
-            Debug.Log($"Unanchoring {name}");
             Body.constraints = RigidbodyConstraints.None;
         }
     }

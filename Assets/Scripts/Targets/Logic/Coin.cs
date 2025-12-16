@@ -10,11 +10,13 @@ public sealed class Coin : MonoBehaviour, IResettable
 
     [Header("Tuning")]
     [SerializeField] private float gravityMultiplier = 2f;
+    [SerializeField] private float linearGravityDrag;
     [SerializeField] private float impulseBackToPlayerBuffer = 0.2f;
 
     private float _noImpulseBackToPlayerTime;
     private bool canImpulseBackToPlayer = false;
     public bool isAttached = false;
+    
 
     private void Awake()
     {
@@ -71,8 +73,23 @@ public sealed class Coin : MonoBehaviour, IResettable
 
     private void ApplyExtraGravity(ref Vector3 velocity)
     {
-        Vector3 gravity = Physics.gravity * gravityMultiplier;
-        velocity += gravity * Time.fixedDeltaTime;
+        Vector3 g = Physics.gravity * gravityMultiplier;
+        Vector3 gDir = g.normalized;
+
+        float vAlongG = Vector3.Dot(velocity, gDir); // + = falling
+
+        // Only apply drag when moving along gravity (falling)
+        if (vAlongG > 0f)
+        {
+            // Drag acceleration magnitude (linear + quadratic)
+            float dragAcc = (linearGravityDrag * vAlongG);
+
+            // Drag points opposite the fall direction (against gravity direction)
+            velocity += (-gDir * dragAcc) * Time.fixedDeltaTime;
+        }
+
+        // Gravity always applies
+        velocity += g * Time.fixedDeltaTime;
     }
 
     private void HandleImpulse()
@@ -98,7 +115,6 @@ public sealed class Coin : MonoBehaviour, IResettable
     {
         if (PlayerPushPull.Instance != null)
         {
-            Debug.Log("Coin Impulse Back To Player");
             PlayerPushPull.Instance.ImpulseBackToPlayer(_pushPullTarget);
         }
     }

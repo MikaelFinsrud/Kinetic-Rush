@@ -280,9 +280,9 @@ MonoBehaviour:
   characterControllerSource: {fileID: 0}
   customVelocityProvider: {fileID: 0}
   useHorizontalSpeed: 0
-  minSpeedToEnable: 6.4
+  minSpeedToEnable: 10
   hysteresis: 0.2
-  speedForMax: 35
+  speedForMax: 45
   minRateOverTime: 15
   maxRateOverTime: 80
   speedToEmissionCurve:
@@ -631,9 +631,9 @@ MonoBehaviour:
   customVelocityProvider: {fileID: 0}
   useHorizontalSpeed: 0
   baseFov: 0
-  maxExtraFov: 20
-  speedForMaxFov: 35
-  minSpeedToEnable: 6.15
+  maxExtraFov: 25
+  speedForMaxFov: 45
+  minSpeedToEnable: 10
   hysteresis: 0.1
   speedToFovCurve:
     serializedVersion: 2
@@ -8832,8 +8832,24 @@ PrefabInstance:
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: baseImpulseStrength
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: pushPullSoftCapSpeed
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: minPushPullMultiplier
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: environmentMask.m_Bits
       value: 2056
+      objectReference: {fileID: 0}
+    - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: continuousAccelStrength
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: upwardPushPullMultiplier
@@ -8844,8 +8860,16 @@ PrefabInstance:
       value: 1.3
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: airFriction
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: slideFriction
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: groundFriction
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: slideBufferTime
@@ -8854,6 +8878,10 @@ PrefabInstance:
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: gravityMultiplier
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: linearGravityDrag
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: slideCooldownTime

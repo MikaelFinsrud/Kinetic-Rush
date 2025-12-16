@@ -23,6 +23,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
     [SerializeField] private float groundFriction = 8f;
 
     [SerializeField] private float maxAirSpeed = 10f;
+    [SerializeField] private float airFriction = 8f;
     [SerializeField] private float airAcceleration = 20f;
     [Tooltip("Extra turning power while in air (0 = none, 1-5 = CS-style feel)")]
     [SerializeField] private float airControl = 2f;
@@ -30,6 +31,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
     [Header("Jump & Gravity")]
     [SerializeField] private float jumpHeight = 1.6f;
     [SerializeField] private float gravityMultiplier = 2f;
+    [SerializeField] private float linearGravityDrag = 0.15f; // try 0.05–0.4
     [Tooltip("Fraction of horizontal speed kept on a normal standing/running jump (0 = none, 1 = keep all).")]
     [SerializeField, Range(0f, 1f)] private float normalJumpHorizontalRetention = 0.25f;
     [Tooltip("Maximum horizontal speed allowed on a normal jump after applying retention.")]
@@ -181,6 +183,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         CheckGround();
         ApplyMovement();
         ClearInput();
+        Debug.Log($"Velocity: {_rb.linearVelocity.magnitude:F2}");
     }
 
     private void LateUpdate()
@@ -254,13 +257,11 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         {
             _isGrounded = true;
             _groundNormal = hit.normal;
-            Debug.Log("Grounded on normal: " + _groundNormal);
         }
         else
         {
             _isGrounded = false;
             _groundNormal = Vector3.up;
-            Debug.Log("Not grounded!");
         }
     }
 
@@ -297,6 +298,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         }
         else
         {
+            ApplyAirFriction(ref velocity);
             AirMove(ref velocity);
             ApplyExtraGravity(ref velocity);
         }
@@ -616,6 +618,21 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         velocity = new Vector3(lateral.x, velocity.y, lateral.z);
     }
 
+    private void ApplyAirFriction(ref Vector3 velocity)
+    {
+        Vector3 lateral = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        float speed = lateral.magnitude;
+        if (speed <= 0.0001f)
+            return;
+
+        float drop = speed / 10 * airFriction * Time.fixedDeltaTime;
+        float newSpeed = Mathf.Max(speed - drop, 0f);
+        lateral *= newSpeed / speed;
+
+        // keep vertical velocity
+        velocity = new Vector3(lateral.x, velocity.y, lateral.z);
+    }
+
     private void Accelerate(ref Vector3 velocity, Vector3 wishDir, float maxSpeed, float accel)
     {
         float currentSpeed = Vector3.Dot(velocity, wishDir);
@@ -623,7 +640,6 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
 
         if (addSpeed <= 0f) 
         {
-            Debug.Log("No speed to add");
             return;
         }
 
@@ -700,8 +716,23 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
 
     private void ApplyExtraGravity(ref Vector3 velocity)
     {
-        Vector3 gravity = Physics.gravity * gravityMultiplier;
-        velocity += gravity * Time.fixedDeltaTime;
+        Vector3 g = Physics.gravity * gravityMultiplier;
+        Vector3 gDir = g.normalized;
+
+        float vAlongG = Vector3.Dot(velocity, gDir); // + = falling
+
+        // Only apply drag when moving along gravity (falling)
+        if (vAlongG > 0f)
+        {
+            // Drag acceleration magnitude (linear + quadratic)
+            float dragAcc = (linearGravityDrag * vAlongG);
+
+            // Drag points opposite the fall direction (against gravity direction)
+            velocity += (-gDir * dragAcc) * Time.fixedDeltaTime;
+        }
+
+        // Gravity always applies
+        velocity += g * Time.fixedDeltaTime;
     }
 
     #endregion
