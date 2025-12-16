@@ -254,8 +254,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   _rb: {fileID: -5450756094213351018}
   _pushPullTarget: {fileID: 4383341947354454739}
-  gravityMultiplier: 2.5
-  impulseBackToPlayerBuffer: 0.25
+  gravityMultiplier: 2
+  impulseBackToPlayerBuffer: 0.2
+  isAttached: 0
 --- !u!82 &6091859093467559444
 AudioSource:
   m_ObjectHideFlags: 0

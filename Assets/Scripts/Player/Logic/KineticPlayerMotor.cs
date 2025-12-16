@@ -847,6 +847,8 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
 
     public void RestoreInitialState()
     {
+        LockCursor();
+
         _coyoteTimer = _initial._coyoteTimer;
         _slideTimer = _initial._slideTimer;
         _slideBufferTimer = _initial._slideBufferTimer;

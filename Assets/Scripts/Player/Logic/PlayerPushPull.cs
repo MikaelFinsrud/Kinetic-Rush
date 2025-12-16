@@ -604,8 +604,8 @@ public class PlayerPushPull : MonoBehaviour, IResettable
 
     public void RestoreInitialState()
     {
-        _lastTarget.Untarget();
-        _currentTarget.Untarget();
+        if (_lastTarget != null) { _lastTarget.Untarget(); }
+        if (_currentTarget != null) { _currentTarget.Untarget(); }
 
         _playerCamera = _initial._playerCamera;
         _pushHeld = _initial._pushHeld;

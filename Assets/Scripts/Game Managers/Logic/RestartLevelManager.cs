@@ -3,6 +3,20 @@ using UnityEngine;
 
 public class RestartLevelManager : MonoBehaviour
 {
+    public static RestartLevelManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Debug.LogError("PlayerPushPull already exists!.");
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -11,7 +25,7 @@ public class RestartLevelManager : MonoBehaviour
         }
     }
 
-    private void RestartLevel()
+    public void RestartLevel()
     {
         MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
 
