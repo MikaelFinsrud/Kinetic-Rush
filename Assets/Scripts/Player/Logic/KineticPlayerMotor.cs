@@ -1,6 +1,8 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+using static PushPullTarget;
+using static UnityEngine.InputManagerEntry;
 
 /// <summary>
 /// Rigidbody-based Quake/CS style controller:
@@ -8,7 +10,7 @@ using UnityEngine;
 /// - World-space velocity (looking around does NOT rotate your velocity)
 /// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
-public class KineticPlayerMotor : MonoBehaviour
+public class KineticPlayerMotor : MonoBehaviour, IResettable
 {
     public static KineticPlayerMotor Instance { get; private set; }
 
@@ -103,11 +105,6 @@ public class KineticPlayerMotor : MonoBehaviour
     private float _crouchedHeight;
     private Vector3 _crouchedCenter;
 
-
-
-    private Rigidbody _rb;
-    private CapsuleCollider _capsule;
-
     // Input (we use legacy Input for now; easy to swap to the new Input System later)
     private Vector2 _moveInput;
     private Vector2 _lookInput;
@@ -121,7 +118,10 @@ public class KineticPlayerMotor : MonoBehaviour
     private bool _isGrounded;
     private Vector3 _groundNormal = Vector3.up;
 
+    private Rigidbody _rb;
+    private CapsuleCollider _capsule;
 
+    
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -161,6 +161,7 @@ public class KineticPlayerMotor : MonoBehaviour
 
     private void Start()
     {
+        CaptureInitialState();
         LockCursor();
     }
 
@@ -760,5 +761,116 @@ public class KineticPlayerMotor : MonoBehaviour
 
         localPos.y = newY;
         cameraRoot.localPosition = localPos;
+    }
+
+
+
+
+
+    private State _initial;
+
+    [System.Serializable]
+    private struct State
+    {
+        public float _coyoteTimer;
+        public float _slideTimer;
+        public float _slideBufferTimer;
+        public float _slideCooldownTimer;
+
+        // internal camera height state
+        public float _standingCamLocalY;
+        public float _crouchedCamLocalY;
+        public float _slideCamLocalY;
+        public float _targetCamLocalY;
+
+        // State
+        public bool _isCrouching;
+        public bool _isSliding;
+        public Vector3 _slideDirection;
+
+        // input state
+        public bool _slidePressed;
+        public bool _slideHeld;
+        public bool _slideReleased;
+
+        // standing / crouched collider data
+        public float _standingHeight;
+        public Vector3 _standingCenter;
+        public float _crouchedHeight;
+        public Vector3 _crouchedCenter;
+
+        // Input (we use legacy Input for now; easy to swap to the new Input System later)
+        public Vector2 _moveInput;
+        public Vector2 _lookInput;
+        public bool _jumpQueued;
+
+        // Look state
+        public float _yaw;
+        public float _pitch;
+
+        // Ground state
+        public bool _isGrounded;
+        public Vector3 _groundNormal;
+    }
+
+    public void CaptureInitialState()
+    {
+        _initial = new State
+        {
+            _coyoteTimer = _coyoteTimer,
+            _slideTimer = _slideTimer,
+            _slideBufferTimer = _slideBufferTimer,
+            _slideCooldownTimer = _slideCooldownTimer,
+            _standingCamLocalY = _standingCamLocalY,
+            _crouchedCamLocalY = _crouchedCamLocalY,
+            _slideCamLocalY = _slideCamLocalY,
+            _targetCamLocalY = _targetCamLocalY,
+            _isCrouching = _isCrouching,
+            _isSliding = _isSliding,
+            _slideDirection = _slideDirection,
+            _slidePressed = _slidePressed,
+            _slideHeld = _slideHeld,
+            _slideReleased = _slideReleased,
+            _standingHeight = _standingHeight,
+            _standingCenter = _standingCenter,
+            _crouchedHeight = _crouchedHeight,
+            _crouchedCenter = _crouchedCenter,
+            _moveInput = _moveInput,
+            _lookInput = _lookInput,
+            _jumpQueued = _jumpQueued,
+            _yaw = _yaw,
+            _pitch = _pitch,
+            _isGrounded = _isGrounded,
+            _groundNormal = _groundNormal
+        };
+    }
+
+    public void RestoreInitialState()
+    {
+        _coyoteTimer = _initial._coyoteTimer;
+        _slideTimer = _initial._slideTimer;
+        _slideBufferTimer = _initial._slideBufferTimer;
+        _slideCooldownTimer = _initial._slideCooldownTimer;
+        _standingCamLocalY = _initial._standingCamLocalY;
+        _crouchedCamLocalY = _initial._crouchedCamLocalY;
+        _slideCamLocalY = _initial._slideCamLocalY;
+        _targetCamLocalY = _initial._targetCamLocalY;
+        _isCrouching = _initial._isCrouching;
+        _isSliding = _initial._isSliding;
+        _slideDirection = _initial._slideDirection;
+        _slidePressed = _initial._slidePressed;
+        _slideHeld = _initial._slideHeld;
+        _slideReleased = _initial._slideReleased;
+        _standingHeight = _initial._standingHeight;
+        _standingCenter = _initial._standingCenter;
+        _crouchedHeight = _initial._crouchedHeight;
+        _crouchedCenter = _initial._crouchedCenter;
+        _moveInput = _initial._moveInput;
+        _lookInput = _initial._lookInput;
+        _jumpQueued = _initial._jumpQueued;
+        _yaw = _initial._yaw;
+        _pitch = _initial._pitch;
+        _isGrounded = _initial._isGrounded;
+        _groundNormal = _initial._groundNormal;
     }
 }

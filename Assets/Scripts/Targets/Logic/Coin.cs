@@ -2,7 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class Coin : MonoBehaviour
+public sealed class Coin : MonoBehaviour, IResettable
 {
     [Header("Refs")]
     [SerializeField] private Rigidbody _rb;
@@ -101,5 +101,15 @@ public sealed class Coin : MonoBehaviour
             Debug.Log("Coin Impulse Back To Player");
             PlayerPushPull.Instance.ImpulseBackToPlayer(_pushPullTarget);
         }
+    }
+
+    public void CaptureInitialState()
+    {
+        
+    }
+
+    public void RestoreInitialState()
+    {
+        Destroy(gameObject);
     }
 }

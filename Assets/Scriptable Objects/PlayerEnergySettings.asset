@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: PlayerEnergySettings
   m_EditorClassIdentifier: Assembly-CSharp::EnergySettingsSO
   maxEnergy: 100
-  regenPerSecond: 18
+  regenPerSecond: 25
   regenDelayAfterSpend: 0.3

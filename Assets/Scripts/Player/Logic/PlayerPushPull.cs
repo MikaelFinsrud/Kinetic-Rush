@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerPushPull : MonoBehaviour
+public class PlayerPushPull : MonoBehaviour, IResettable
 {
     public static PlayerPushPull Instance { get; private set; }
 
@@ -84,6 +84,11 @@ public class PlayerPushPull : MonoBehaviour
         {
             _playerCamera = Camera.main;
         }
+    }
+
+    private void Start()
+    {
+        CaptureInitialState();
     }
 
     private void Update()
@@ -550,4 +555,71 @@ public class PlayerPushPull : MonoBehaviour
                         _playerCamera.transform.position + _playerCamera.transform.forward * maxRange);
     }
 #endif
+
+
+
+
+
+
+    private State _initial;
+
+    [System.Serializable]
+    private struct State
+    {
+        public Camera _playerCamera;
+
+        // Input buffer flags (Update -> FixedUpdate).
+        public bool _pushHeld;
+        public bool _pullHeld;
+        public bool _pushPressedThisFrame;
+        public bool _pullPressedThisFrame;
+        public bool _isPushing;
+        public bool _isPulling;
+
+        // Cached hit target each physics step.
+        public PushPullTarget _currentTarget;
+        public PushPullTarget _lastTarget;
+
+        public RaycastHit _currentHit;
+        public Vector3 _currentTargetOrigin;
+    }
+
+    public void CaptureInitialState()
+    {
+        _initial = new State
+        {
+            _playerCamera = _playerCamera,
+            _pushHeld = _pushHeld,
+            _pullHeld = _pullHeld,
+            _pushPressedThisFrame = _pushPressedThisFrame,
+            _pullPressedThisFrame = _pullPressedThisFrame,
+            _isPushing = _isPushing,
+            _isPulling = _isPulling,
+            _currentTarget = _currentTarget,
+            _lastTarget = _lastTarget,
+            _currentHit = _currentHit,
+            _currentTargetOrigin = _currentTargetOrigin
+        };
+    }
+
+    public void RestoreInitialState()
+    {
+        _lastTarget.Untarget();
+        _currentTarget.Untarget();
+
+        _playerCamera = _initial._playerCamera;
+        _pushHeld = _initial._pushHeld;
+        _pullHeld = _initial._pullHeld;
+        _pushPressedThisFrame = _initial._pushPressedThisFrame;
+        _pullPressedThisFrame = _initial._pullPressedThisFrame;
+        _isPushing = _initial._isPushing;
+        _isPulling = _initial._isPulling;
+        _currentTarget = _initial._currentTarget;
+        _lastTarget = _initial._lastTarget;
+        _currentHit = _initial._currentHit;
+        _currentTargetOrigin = _initial._currentTargetOrigin;
+
+        OnStopPull?.Invoke();
+        OnStopPush?.Invoke();
+    }
 }

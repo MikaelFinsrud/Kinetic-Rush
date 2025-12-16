@@ -1,7 +1,8 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class PushPullTarget : MonoBehaviour
+public class PushPullTarget : MonoBehaviour, IResettable
 {
     public enum TargetKind
     {
@@ -82,6 +83,11 @@ public class PushPullTarget : MonoBehaviour
         IsAnchored = kind == TargetKind.GenericAlwaysAnchored;
     }
 
+    private void Start()
+    {
+        CaptureInitialState();
+    }
+
     /// <summary>
     /// Call this from your coin logic when it hits / sticks to a surface.
     /// </summary>
@@ -113,4 +119,39 @@ public class PushPullTarget : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, 0.25f);
     }
 #endif
+
+
+
+
+
+
+    private State _initial;
+
+    [System.Serializable]
+    private struct State
+    {
+        public float interactionMass;
+        public float _nextImpulseTime;
+        public TargetKind Kind;
+        public bool IsAnchored;
+    }
+
+    public void CaptureInitialState()
+    {
+        _initial = new State
+        {
+            interactionMass = interactionMass,
+            _nextImpulseTime = 0f,
+            Kind = kind,
+            IsAnchored = IsAnchored,
+        };
+    }
+
+    public void RestoreInitialState()
+    {
+        interactionMass = _initial.interactionMass;
+        _nextImpulseTime = _initial._nextImpulseTime;
+        kind = _initial.Kind;
+        IsAnchored = _initial.IsAnchored;
+    }
 }
