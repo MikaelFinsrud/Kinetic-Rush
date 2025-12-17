@@ -94,13 +94,13 @@ public class PlayerPushPull : MonoBehaviour, IResettable
     private void Update()
     {
         // You can replace this with Input System bindings later.
-        _pushHeld = Input.GetMouseButton(0);
-        _pullHeld = Input.GetMouseButton(1);
-
-        if (Input.GetMouseButtonDown(0))
-            _pushPressedThisFrame = true;
+        _pushHeld = Input.GetMouseButton(1);
+        _pullHeld = Input.GetMouseButton(0);
 
         if (Input.GetMouseButtonDown(1))
+            _pushPressedThisFrame = true;
+
+        if (Input.GetMouseButtonDown(0))
             _pullPressedThisFrame = true;
     }
 
@@ -266,37 +266,34 @@ public class PlayerPushPull : MonoBehaviour, IResettable
         // Direction from player to target in world space.
         Vector3 dir = CalculateTargetDir(_currentTargetOrigin);
 
-        if (_currentTarget.CanReceiveImpulse && energy.TrySpendInstant(_bigImpulseCost))
+        // Impulse on button down.
+        if (_pushPressedThisFrame && _currentTarget.CanReceivePushImpulse && energy.TrySpendInstant(_bigImpulseCost))
         {
-            // Impulse on button down.
-            if (_pushPressedThisFrame)
+            if (_isPulling)
             {
-                if (_isPulling)
-                {
-                    StopPulling();
-                }
-
-                OnPush?.Invoke(true);
-                _isPushing = true;
-                ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
-                _currentTarget.RegisterImpulse(true);
-
-                return;
+                StopPulling();
             }
-            if (_pullPressedThisFrame)
+
+            OnPush?.Invoke(true);
+            _isPushing = true;
+            ApplyForce(_currentTarget, dir, isPull: false, baseImpulseStrength, ForceMode.Impulse);
+            _currentTarget.RegisterImpulse(true);
+
+            return;
+        }
+        if (_pullPressedThisFrame && _currentTarget.CanReceivePullImpulse && energy.TrySpendInstant(_bigImpulseCost))
+        {
+            if (_isPushing)
             {
-                if (_isPushing)
-                {
-                    StopPushing();
-                }
-
-                _isPulling = true;
-                OnPull?.Invoke(true);
-                ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
-                _currentTarget.RegisterImpulse(false);
-
-                return;
+                StopPushing();
             }
+
+            _isPulling = true;
+            OnPull?.Invoke(true);
+            ApplyForce(_currentTarget, dir, isPull: true, baseImpulseStrength, ForceMode.Impulse);
+            _currentTarget.RegisterImpulse(false);
+
+            return;
         }
 
         // Continuous small force while held.

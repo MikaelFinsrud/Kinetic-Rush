@@ -19,7 +19,8 @@ public class PushPullTarget : MonoBehaviour, IResettable
     [SerializeField] private float interactionMass = 50f;
     // When anchored, we treat this as effectively infinite mass (world-attached).
 
-    private float _nextImpulseTime;
+    private float _nextPushImpulseTime;
+    private float _nextPullImpulseTime;
 
     public TargetKind Kind => kind;
     public bool IsAnchored { get; private set; }
@@ -49,19 +50,21 @@ public class PushPullTarget : MonoBehaviour, IResettable
         }
     }
 
-    public bool CanReceiveImpulse => Time.time >= _nextImpulseTime;
+    public bool CanReceivePushImpulse => Time.time >= _nextPushImpulseTime;
+    public bool CanReceivePullImpulse => Time.time >= _nextPullImpulseTime;
 
     public void RegisterImpulse(bool isPush)
     {
-        _nextImpulseTime = Time.time + impulseCooldown;
-
         if (isPush)
         {
-            OnPushed?.Invoke();
+            _nextPushImpulseTime = Time.time + impulseCooldown;
 
+            OnPushed?.Invoke();
         }
         else
         {
+            _nextPullImpulseTime = Time.time + impulseCooldown;
+
             OnPulled?.Invoke();
         }
     }
@@ -129,7 +132,8 @@ public class PushPullTarget : MonoBehaviour, IResettable
     private struct State
     {
         public float interactionMass;
-        public float _nextImpulseTime;
+        public float _nextPushImpulseTime;
+        public float _nextPullImpulseTime;
         public TargetKind Kind;
         public bool IsAnchored;
     }
@@ -139,7 +143,8 @@ public class PushPullTarget : MonoBehaviour, IResettable
         _initial = new State
         {
             interactionMass = interactionMass,
-            _nextImpulseTime = 0f,
+            _nextPushImpulseTime = 0f,
+            _nextPullImpulseTime = 0f,
             Kind = kind,
             IsAnchored = IsAnchored,
         };
@@ -148,7 +153,8 @@ public class PushPullTarget : MonoBehaviour, IResettable
     public void RestoreInitialState()
     {
         interactionMass = _initial.interactionMass;
-        _nextImpulseTime = _initial._nextImpulseTime;
+        _nextPushImpulseTime = _initial._nextPushImpulseTime;
+        _nextPullImpulseTime = _initial._nextPullImpulseTime;
         kind = _initial.Kind;
         IsAnchored = _initial.IsAnchored;
     }
