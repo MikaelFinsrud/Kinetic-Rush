@@ -265,6 +265,14 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         }
     }
 
+    private void ConstrainVelocityToGroundPlane(ref Vector3 velocity)
+    {
+        // Remove any component into/out of the surface normal.
+        // This stops the solver from repeatedly "correcting" you uphill.
+        velocity = Vector3.ProjectOnPlane(velocity, _groundNormal);
+    }
+
+
     private void UpdateSlideCooldownTimer()
     {
         if (_slideCooldownTimer > 0f)
@@ -338,6 +346,11 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
             {
                 StopSlide();
             }
+        }
+
+        if (_isGrounded && !_jumpQueued) // don't fight the jump impulse
+        {
+            ConstrainVelocityToGroundPlane(ref velocity);
         }
 
         _rb.linearVelocity = velocity;
@@ -564,7 +577,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
             accel *= crouchAccelerationMultiplier;
         }
 
-        Accelerate(ref velocity, wishDir, maxGroundSpeed, groundAcceleration);
+        Accelerate(ref velocity, wishDir, maxSpeed, groundAcceleration);
     }
 
     private void AirMove(ref Vector3 velocity)
