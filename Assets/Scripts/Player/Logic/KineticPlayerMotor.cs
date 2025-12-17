@@ -21,6 +21,8 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
     [SerializeField] private float maxGroundSpeed = 10f;
     [SerializeField] private float groundAcceleration = 60f;
     [SerializeField] private float groundFriction = 8f;
+    [SerializeField, Range(0f, 89f)]
+    private float maxWalkableSlopeAngle = 50f;
 
     [SerializeField] private float maxAirSpeed = 10f;
     [SerializeField] private float airFriction = 8f;
@@ -118,6 +120,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
 
     // Ground state
     private bool _isGrounded;
+    private bool _isOnSteepSlope;
     private Vector3 _groundNormal = Vector3.up;
 
     private Rigidbody _rb;
@@ -250,17 +253,26 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         }
     }
 
+    private bool IsWalkable(Vector3 normal)
+    {
+        // Equivalent to Vector3.Angle(normal, Vector3.up) <= maxWalkableSlopeAngle
+        float minDot = Mathf.Cos(maxWalkableSlopeAngle * Mathf.Deg2Rad);
+        return Vector3.Dot(normal, Vector3.up) >= minDot;
+    }
+
     private void CheckGround()
     {
         Vector3 origin = transform.position + Vector3.up * 1f;
         if (Physics.SphereCast(origin, groundCheckRadius, Vector3.down, out RaycastHit hit, groundCheckDistance, groundLayers, QueryTriggerInteraction.Ignore))
         {
-            _isGrounded = true;
             _groundNormal = hit.normal;
+            _isGrounded = IsWalkable(_groundNormal);
+            _isOnSteepSlope = !_isGrounded;
         }
         else
         {
             _isGrounded = false;
+            _isOnSteepSlope = false;
             _groundNormal = Vector3.up;
         }
     }
@@ -307,7 +319,12 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         else
         {
             ApplyAirFriction(ref velocity);
-            AirMove(ref velocity);
+
+            if (!_isOnSteepSlope)
+            {
+                AirMove(ref velocity);
+            }
+
             ApplyExtraGravity(ref velocity);
         }
 
