@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
 using static PushPullTarget;
@@ -70,6 +71,13 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
     private float _slideBufferTimer;
     [SerializeField] private float slideCooldownTime = 0.2f;
     private float _slideCooldownTimer;
+    [SerializeField, Range(0f, 89f)]
+    private float infiniteDownhillMinAngle = 12f;
+    [SerializeField, Range(-1f, 1f)]
+    private float downhillAlignmentDot = 0.2f; // 0.0 = any downhill, 0.5 = must be clearly downhill
+    [SerializeField, Range(0f, 5f)]
+    private float downhillSlideGravityMultiplier;
+
 
     [Header("Crouch")]
     [Tooltip("Capsule height multiplier when crouched/ sliding.")]
@@ -348,13 +356,15 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         // Slide auto-stop conditions (after movement/jump)
         if (_isSliding)
         {
+            bool infiniteDownhill = IsInfiniteDownhillSlide(velocity);
+
             _slideTimer -= Time.fixedDeltaTime;
 
             Vector3 horiz = Vector3.ProjectOnPlane(velocity, Vector3.up);
             float speed = horiz.magnitude;
 
             // slideHeld: from your input (Alt) – pass into ApplyMovement/FixedUpdate as we discussed
-            bool timeUp = _slideTimer <= 0f;
+            bool timeUp = !infiniteDownhill && _slideTimer <= 0f;
             bool releasedKey = !_slideHeld;
             bool leftGround = !_isGrounded;
             bool speedTooLow = speed < minSlideSpeed * 0.5f;
@@ -412,28 +422,61 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         }
     }
 
+    private bool IsInfiniteDownhillSlide(Vector3 velocity)
+    {
+        if (!_isGrounded || !_isSliding) return false;
+
+        // slope angle in degrees
+        float upDot = Mathf.Clamp(Vector3.Dot(_groundNormal, Vector3.up), -1f, 1f);
+        float slopeAngle = Mathf.Acos(upDot) * Mathf.Rad2Deg;
+        if (slopeAngle < infiniteDownhillMinAngle) return false;
+
+        // downhill direction along the surface (gravity projected onto the surface)
+        Vector3 downhill = Vector3.ProjectOnPlane(Vector3.down, _groundNormal);
+        float downhillMag = downhill.magnitude;
+        if (downhillMag < 0.0001f) return false;
+        downhill /= downhillMag;
+
+        // are we actually moving downhill along the surface?
+        Vector3 alongSurfaceVel = Vector3.ProjectOnPlane(velocity, _groundNormal);
+        float speed = alongSurfaceVel.magnitude;
+        if (speed < 0.1f) return false;
+
+        Vector3 dir = alongSurfaceVel / speed;
+        return Vector3.Dot(dir, downhill) > downhillAlignmentDot;
+    }
+
+
     private void SlideMove(ref Vector3 velocity)
     {
         // Only affect horizontal
-        Vector3 horizontal = Vector3.ProjectOnPlane(velocity, Vector3.up);
-        float speed = horizontal.magnitude;
+        Vector3 tangent = Vector3.ProjectOnPlane(velocity, _groundNormal);
+        float speed = tangent.magnitude;
+        Vector3 g = Physics.gravity * gravityMultiplier;
+        Vector3 gParallel = Vector3.ProjectOnPlane(g, _groundNormal); // lies along the surface
 
         if (speed > 0.0001f)
         {
             // Keep sliding mostly along stored slide direction
             Vector3 dir = _slideDirection.sqrMagnitude > 0.0001f
                 ? _slideDirection
-                : horizontal.normalized;
+                : tangent.normalized;
 
-            horizontal = dir * speed;
+            dir = Vector3.ProjectOnPlane(dir, _groundNormal);
+            if (dir.sqrMagnitude < 0.000001f) dir = tangent / speed;
+            dir.Normalize();
 
             // Apply small slide friction (much lower than groundFriction)
             float drop = slideFriction * Time.fixedDeltaTime;
             float newSpeed = Mathf.Max(speed - drop, 0f);
-            horizontal = dir * newSpeed;
+            tangent = dir * newSpeed;
         }
 
-        velocity = new Vector3(horizontal.x, velocity.y, horizontal.z);
+        // Combine surface motion + a bit of into-ground “stick”
+        velocity = tangent + _groundNormal;
+
+        // Add downhill acceleration (adds speed downhill naturally)
+        velocity += gParallel * downhillSlideGravityMultiplier * Time.fixedDeltaTime;
     }
 
     private void HandleSlideCrouch(ref Vector3 velocity)
