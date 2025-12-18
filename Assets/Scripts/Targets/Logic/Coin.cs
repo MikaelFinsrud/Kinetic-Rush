@@ -13,6 +13,8 @@ public sealed class Coin : MonoBehaviour, IResettable
     [SerializeField] private float linearGravityDrag;
     [SerializeField] private float impulseBackToPlayerBuffer = 0.2f;
 
+    public GameObject Shooter { get; set; }
+
     private float _noImpulseBackToPlayerTime;
     private bool canImpulseBackToPlayer = false;
     public bool isAttached = false;
@@ -50,6 +52,34 @@ public sealed class Coin : MonoBehaviour, IResettable
             ImpulseBackToPlayer();
             canImpulseBackToPlayer = false;
         }
+
+        HandleImpact(c);
+    }
+
+    private void HandleImpact(Collision collision)
+    {
+        // Contact (avoid collision.contacts which allocates)
+        ContactPoint cp = collision.GetContact(0);
+
+        // Prefer relative velocity for impact strength
+        float impactSpeed = collision.relativeVelocity.magnitude;
+
+        // Try to find a CoinTarget on the collider or its parents
+        CoinTarget target = collision.collider.GetComponent<CoinTarget>();
+
+        if (target == null) return;
+
+        var ctx = new CoinHitContext(
+            shooter: Shooter,
+            coin: gameObject,
+            target: target.gameObject,
+            hitPoint: cp.point,
+            hitNormal: cp.normal,
+            impactSpeed: impactSpeed,
+            rayHit: null // no raycast here
+        );
+
+        target.TryHit(in ctx);
     }
 
     public void Launch(Vector3 velocity, float spinRadPerSec, Rigidbody launchParent)

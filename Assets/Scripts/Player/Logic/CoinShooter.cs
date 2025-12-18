@@ -66,6 +66,7 @@ public sealed class CoinShooter : MonoBehaviour, IResettable
             inherited = new Vector3(inherited.x, inherited.y * yInherit, inherited.z);
         }
 
+        coin.Shooter = gameObject;
         coin.Launch(inherited + (_muzzle.transform.forward * _shootSpeed), _coinSpinRadPerSec, _playerRigidbody);
     }
 
