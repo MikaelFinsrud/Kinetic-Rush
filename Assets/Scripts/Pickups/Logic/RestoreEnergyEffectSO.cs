@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "SOs/Pickup Effects/Restore Energy")]
+[CreateAssetMenu(menuName = "SOs/Pickups/Effects/Restore Energy")]
 public class RestoreEnergyEffectSO : PickupEffectSO
 {
     [SerializeField] private bool restoreFull = true;
