@@ -10,6 +10,7 @@ public class CoinTargetDefinitionSO : ScriptableObject
 
     // Optional feedback
     public AudioClip sfx;
+    public float sfxVolume = 1f;
     public GameObject vfxPrefab;
 
     // Optional: single-use targets

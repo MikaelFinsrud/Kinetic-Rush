@@ -16,6 +16,7 @@ MonoBehaviour:
   effects:
   - {fileID: 11400000, guid: 032c707dc68cbb94a840ee038c29384e, type: 2}
   requireAllEffectsApplicable: 1
-  sfx: {fileID: 0}
-  vfxPrefab: {fileID: 0}
+  sfx: {fileID: 8300000, guid: c8f622869c9ed774db315bd69151c364, type: 3}
+  sfxVolume: 1
+  vfxPrefab: {fileID: 2433151994187714776, guid: d92ef58986b470b4d88baa952e1f3dd3, type: 3}
   disableAfterHit: 0

@@ -47,16 +47,17 @@ public sealed class Coin : MonoBehaviour, IResettable
         // Take first contact (you can average normals if you want)
         AlignFlatToSurfaceNormal(c.GetContact(0).normal);
 
-        if (canImpulseBackToPlayer && Time.time <= _noImpulseBackToPlayerTime)
+        bool hitCoinTarget = HandleImpact(c);
+
+        if (!hitCoinTarget && canImpulseBackToPlayer && Time.time <= _noImpulseBackToPlayerTime)
         {
             ImpulseBackToPlayer();
             canImpulseBackToPlayer = false;
         }
 
-        HandleImpact(c);
     }
 
-    private void HandleImpact(Collision collision)
+    private bool HandleImpact(Collision collision)
     {
         // Contact (avoid collision.contacts which allocates)
         ContactPoint cp = collision.GetContact(0);
@@ -67,7 +68,10 @@ public sealed class Coin : MonoBehaviour, IResettable
         // Try to find a CoinTarget on the collider or its parents
         CoinTarget target = collision.collider.GetComponent<CoinTarget>();
 
-        if (target == null) return;
+        if (target == null)
+        {
+            return false;
+        }
 
         var ctx = new CoinHitContext(
             shooter: Shooter,
@@ -80,6 +84,8 @@ public sealed class Coin : MonoBehaviour, IResettable
         );
 
         target.TryHit(in ctx);
+
+        return true;
     }
 
     public void Launch(Vector3 velocity, float spinRadPerSec, Rigidbody launchParent)

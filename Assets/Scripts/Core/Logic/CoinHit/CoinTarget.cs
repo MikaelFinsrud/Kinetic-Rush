@@ -6,6 +6,8 @@ public class CoinTarget : MonoBehaviour, IResettable
 
     private bool _used;
 
+    private GameObject currentVFX;
+
     public bool TryHit(in CoinHitContext ctx)
     {
         if (_used || definition == null) return false;
@@ -35,8 +37,8 @@ public class CoinTarget : MonoBehaviour, IResettable
         }
 
         // Feedback (optional)
-        if (definition.vfxPrefab) { Instantiate(definition.vfxPrefab, ctx.HitPoint, Quaternion.LookRotation(ctx.HitNormal)); }
-        if (definition.sfx) { AudioSource.PlayClipAtPoint(definition.sfx, ctx.HitPoint); }
+        if (definition.vfxPrefab) { currentVFX = Instantiate(definition.vfxPrefab, ctx.HitPoint, Quaternion.LookRotation(ctx.HitNormal)); }
+        if (definition.sfx) { AudioSource.PlayClipAtPoint(definition.sfx, ctx.HitPoint, definition.sfxVolume); }
 
         // Hook
         if (receiver != null) { receiver.OnHit(definition, in ctx); }
@@ -59,5 +61,10 @@ public class CoinTarget : MonoBehaviour, IResettable
     {
         _used = false;
         gameObject.SetActive(true);
+
+        if (currentVFX != null)
+        {
+            Destroy(currentVFX);
+        }
     }
 }

@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 18161
+  controlID: 40754
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 112}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 18162
+  controlID: 40755
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -460,10 +460,10 @@ MonoBehaviour:
       displayed: 0
       id: Scene View/Particles
       index: 7
-      contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":0.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
+      contents: '{"m_Layout":4,"m_Collapsed":false,"m_Folded":false,"m_Floating":false,"m_FloatingSnapOffset":{"x":0.0,"y":25.0},"m_SnapOffsetDelta":{"x":0.0,"y":0.0},"m_FloatingSnapCorner":0,"m_Size":{"x":0.0,"y":0.0},"m_SizeOverridden":false}'
       floating: 0
       collapsed: 0
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       layout: 4
@@ -712,7 +712,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
     m_DynamicPanelBehavior: 0
   m_WindowGUID: cc27987af1a868c49b0894db9c0f5429
-  m_Gizmos: 0
+  m_Gizmos: 1
   m_OverrideSceneCullingMask: 6917529027641081856
   m_SceneIsLit: 1
   m_SceneLighting: 1
@@ -722,9 +722,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -44.59865, y: 4.2878914, z: -12.246625}
+    m_Target: {x: -56.597095, y: 7.671257, z: -12.173741}
     speed: 2
-    m_Value: {x: -44.59865, y: 4.2878914, z: -12.246625}
+    m_Value: {x: -56.597095, y: 7.671257, z: -12.173741}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -770,13 +770,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: -0.01842324, y: 0.95161873, z: -0.058626946, w: -0.300663}
+    m_Target: {x: 0.29757854, y: 0.21582222, z: -0.06912262, w: 0.92728907}
     speed: 2
-    m_Value: {x: -0.018425517, y: 0.95173633, z: -0.05863419, w: -0.30070016}
+    m_Value: {x: 0.297612, y: 0.21584648, z: -0.06913039, w: 0.9273933}
   m_Size:
-    m_Target: 6.836988
+    m_Target: 0.0012182073
     speed: 2
-    m_Value: 6.836988
+    m_Value: 0.0012182073
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -908,7 +908,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 56}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 18211
+  controlID: 40802
   draggingID: 0
 --- !u!114 &8
 MonoBehaviour:
@@ -929,8 +929,8 @@ MonoBehaviour:
     y: 0
     width: 530
     height: 457
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 201, y: 226}
+  m_MaxSize: {x: 4001, y: 4026}
   m_ActualView: {fileID: 9}
   m_Panes:
   - {fileID: 9}
@@ -976,14 +976,19 @@ MonoBehaviour:
     m_DynamicPanelBehavior: 0
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 0}
+      scrollPos: {x: 0, y: 246}
       m_SelectedIDs: []
       m_LastClickedID:
         m_Data: 0
       m_ExpandedIDs:
+      - m_Data: -114846
+      - m_Data: -94096
+      - m_Data: -93576
       - m_Data: -1332
       - m_Data: -1294
       - m_Data: 47450
+      - m_Data: 67800
+      - m_Data: 68034
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -1001,7 +1006,7 @@ MonoBehaviour:
         m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
-        m_ClientGUIView: {fileID: 8}
+        m_ClientGUIView: {fileID: 0}
       m_SearchString: 
     m_ExpandedScenes: []
     m_CurrenRootInstanceID: 0
@@ -1028,8 +1033,8 @@ MonoBehaviour:
     y: 0
     width: 1425
     height: 457
-  m_MinSize: {x: 232, y: 276}
-  m_MaxSize: {x: 10002, y: 10026}
+  m_MinSize: {x: 230, y: 250}
+  m_MaxSize: {x: 10000, y: 10000}
   m_ActualView: {fileID: 11}
   m_Panes:
   - {fileID: 11}
@@ -1086,7 +1091,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts/Core/Logic
+    - Assets/Scriptable Objects/Targets
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1110,41 +1115,21 @@ MonoBehaviour:
     - m_Data: 0
     - m_Data: 48124
     - m_Data: 48126
-    - m_Data: 48128
-    - m_Data: 48130
-    - m_Data: 48132
-    - m_Data: 48134
-    - m_Data: 48136
-    - m_Data: 48138
-    - m_Data: 48140
-    - m_Data: 48142
+    - m_Data: 48146
     - m_Data: 48148
     - m_Data: 48150
-    - m_Data: 48152
-    - m_Data: 48154
     - m_Data: 48156
     - m_Data: 48158
-    - m_Data: 48162
-    - m_Data: 48164
-    - m_Data: 48166
     - m_Data: 48170
     - m_Data: 48172
     - m_Data: 48174
-    - m_Data: 48176
-    - m_Data: 48180
-    - m_Data: 48186
     - m_Data: 48188
-    - m_Data: 48192
-    - m_Data: 48194
-    - m_Data: 48196
     - m_Data: 48622
-    - m_Data: 48792
-    - m_Data: 48796
-    - m_Data: 49682
-    - m_Data: 49690
     - m_Data: 49694
-    - m_Data: 49824
     - m_Data: 50296
+    - m_Data: 68136
+    - m_Data: 68598
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1171,50 +1156,30 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 480}
+    scrollPos: {x: 0, y: 180}
     m_SelectedIDs:
     - m_Data: 48748
     m_LastClickedID:
-      m_Data: 48748
+      m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
     - m_Data: 48124
     - m_Data: 48126
-    - m_Data: 48128
-    - m_Data: 48130
-    - m_Data: 48132
-    - m_Data: 48134
-    - m_Data: 48136
-    - m_Data: 48138
-    - m_Data: 48140
-    - m_Data: 48142
+    - m_Data: 48146
     - m_Data: 48148
     - m_Data: 48150
-    - m_Data: 48152
-    - m_Data: 48154
     - m_Data: 48156
     - m_Data: 48158
-    - m_Data: 48162
-    - m_Data: 48164
-    - m_Data: 48166
     - m_Data: 48170
     - m_Data: 48172
     - m_Data: 48174
-    - m_Data: 48176
-    - m_Data: 48180
-    - m_Data: 48186
     - m_Data: 48188
-    - m_Data: 48192
-    - m_Data: 48194
-    - m_Data: 48196
     - m_Data: 48622
-    - m_Data: 48792
-    - m_Data: 48796
-    - m_Data: 49682
-    - m_Data: 49690
     - m_Data: 49694
-    - m_Data: 49824
     - m_Data: 50296
+    - m_Data: 68136
+    - m_Data: 68598
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

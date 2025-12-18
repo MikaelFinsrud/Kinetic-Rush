@@ -8,6 +8,8 @@ public class Pickup : MonoBehaviour, IResettable
     private Collider _col;
     private bool _consumed;
 
+    private GameObject currentVFX;
+
     private void Awake()
     {
         _col = GetComponent<Collider>();
@@ -50,7 +52,7 @@ public class Pickup : MonoBehaviour, IResettable
     {
         _consumed = true;
 
-        if (definition.vfxPrefab) Instantiate(definition.vfxPrefab, transform.position, Quaternion.identity);
+        if (definition.vfxPrefab) currentVFX = Instantiate(definition.vfxPrefab, transform.position, Quaternion.identity);
         if (definition.sfx) AudioSource.PlayClipAtPoint(definition.sfx, transform.position, definition.sfxVolume);
 
         if (definition.consumeOnSuccess)
@@ -69,5 +71,10 @@ public class Pickup : MonoBehaviour, IResettable
     {
         _consumed = false;
         gameObject.SetActive(true);
+
+        if (currentVFX != null)
+        {
+            Destroy(currentVFX);
+        }
     }
 }
