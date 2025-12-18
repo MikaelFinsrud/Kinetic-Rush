@@ -27,7 +27,7 @@ public class RestartLevelManager : MonoBehaviour
 
     public void RestartLevel()
     {
-        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
         IResettable[] resettables = allMonoBehaviours.OfType<IResettable>().ToArray();
 

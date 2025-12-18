@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
-public class Pickup : MonoBehaviour
+public class Pickup : MonoBehaviour, IResettable
 {
     [SerializeField] private PickupDefinitionSO definition;
 
@@ -60,8 +60,12 @@ public class Pickup : MonoBehaviour
         }
     }
 
-    // For your instant restart system: call this from your global reset
-    public void ResetPickup()
+    public void CaptureInitialState()
+    {
+
+    }
+
+    public void RestoreInitialState()
     {
         _consumed = false;
         gameObject.SetActive(true);
