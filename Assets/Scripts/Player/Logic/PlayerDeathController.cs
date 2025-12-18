@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 
 [DisallowMultipleComponent]
-public sealed class PlayerDeathController : MonoBehaviour, IDeathReceiver
+public sealed class PlayerDeathController : MonoBehaviour, IDeathReceiver, IResettable
 {
     public bool IsDead { get; private set; }
 
@@ -76,7 +76,6 @@ public sealed class PlayerDeathController : MonoBehaviour, IDeathReceiver
                 if (_disableOnDeath[i] != null)
                 {
                     _disableOnDeath[i].enabled = true;
-
                 }
             }
         }
@@ -85,5 +84,27 @@ public sealed class PlayerDeathController : MonoBehaviour, IDeathReceiver
         {
             RestartLevelManager.Instance.RestartLevel();
         }
+    }
+
+    public void CaptureInitialState()
+    {
+
+    }
+
+    public void RestoreInitialState()
+    {
+        if (_disableOnDeath != null)
+        {
+            for (int i = 0; i < _disableOnDeath.Length; i++)
+            {
+                if (_disableOnDeath[i] != null)
+                {
+                    _disableOnDeath[i].enabled = true;
+                }
+            }
+        }
+
+        IsDead = false;
+        _restartAtTime = -1f;
     }
 }

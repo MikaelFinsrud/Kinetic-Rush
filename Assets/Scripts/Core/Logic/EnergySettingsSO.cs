@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "KineticRush/Energy Settings")]
+[CreateAssetMenu(menuName = "SOs/Energy Settings")]
 public sealed class EnergySettingsSO : ScriptableObject
 {
     [Header("Pool")]
