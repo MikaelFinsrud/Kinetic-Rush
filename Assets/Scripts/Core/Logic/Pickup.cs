@@ -51,7 +51,7 @@ public class Pickup : MonoBehaviour
         _consumed = true;
 
         if (definition.vfxPrefab) Instantiate(definition.vfxPrefab, transform.position, Quaternion.identity);
-        if (definition.sfx) AudioSource.PlayClipAtPoint(definition.sfx, transform.position);
+        if (definition.sfx) AudioSource.PlayClipAtPoint(definition.sfx, transform.position, definition.sfxVolume);
 
         if (definition.consumeOnSuccess)
         {

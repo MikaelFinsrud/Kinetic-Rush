@@ -15,6 +15,9 @@ GameObject:
   - component: {fileID: 6090003253690619173}
   - component: {fileID: 7066648615307067331}
   - component: {fileID: 6274716231347513315}
+  - component: {fileID: 2976891134930633919}
+  - component: {fileID: 4680141105687478218}
+  - component: {fileID: 3357442497618872441}
   m_Layer: 6
   m_Name: Player
   m_TagString: Untagged
@@ -102,14 +105,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KineticPlayerMotor
   cameraRoot: {fileID: 2697527386892271151}
   maxGroundSpeed: 6
-  groundAcceleration: 60
-  groundFriction: 30
-  maxAirSpeed: 4
+  groundAcceleration: 20
+  groundFriction: 20
+  maxWalkableSlopeAngle: 50
+  maxAirSpeed: 6
+  airFriction: 3
   airAcceleration: 7
   airControl: 7
-  jumpHeight: 1.6
-  gravityMultiplier: 2.5
-  normalJumpHorizontalRetention: 0.25
+  jumpHeight: 1.3
+  gravityMultiplier: 2
+  linearGravityDrag: 0.6
+  normalJumpHorizontalRetention: 0.75
   normalJumpMaxHorizontalSpeed: 6
   coyoteTime: 0.15
   groundCheckRadius: 0.4
@@ -119,14 +125,17 @@ MonoBehaviour:
     m_Bits: 136
   mouseSensitivity: 2
   maxPitch: 89
-  slideKey: 113
-  minSlideSpeed: 4
+  slideKey: 304
+  minSlideSpeed: 3
   slideBoost: 6
-  slideBoostSpeedThreshold: 16
-  slideFriction: 3
+  slideBoostSpeedThreshold: 15
+  slideFriction: 2
   maxSlideTime: 0.6
-  slideBufferTime: 0.5
-  slideCooldownTime: 0.1
+  slideBufferTime: 0.2
+  slideCooldownTime: 0.15
+  infiniteDownhillMinAngle: 10
+  downhillAlignmentDot: 0.2
+  downhillSlideGravityMultiplier: 1
   crouchHeightMultiplier: 0.5
   crouchSpeedMultiplier: 0.3
   crouchAccelerationMultiplier: 0.7
@@ -152,16 +161,16 @@ MonoBehaviour:
     m_Bits: 896
   environmentMask:
     serializedVersion: 2
-    m_Bits: 8
-  maxRange: 30
+    m_Bits: 2056
+  maxRange: 20
   anchorCheckDistance: 0.3
-  baseImpulseStrength: 15
-  _bigImpulseCost: 20
-  continuousAccelStrength: 30
-  _continuousCostPerSecond: 20
-  upwardPushPullMultiplier: 1.5
-  pushPullSoftCapSpeed: 20
-  minPushPullMultiplier: 0.15
+  baseImpulseStrength: 10
+  _bigImpulseCost: 12
+  continuousAccelStrength: 20
+  _continuousCostPerSecond: 25
+  upwardPushPullMultiplier: 1.35
+  pushPullSoftCapSpeed: 45
+  minPushPullMultiplier: 0.3
 --- !u!114 &7066648615307067331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,6 +206,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEnergy
   _settings: {fileID: 11400000, guid: cb940b9d5e74b974aa523af7f83cf8b8, type: 2}
   _startEnergy: 100
+--- !u!114 &2976891134930633919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03010582db40908468a159bbba36e74d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResettableRigidbody
+  _rb: {fileID: 2622056009189611534}
+--- !u!114 &4680141105687478218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c3cc461c11bb8142b98d336e0a69705, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathController
+  _rb: {fileID: 2622056009189611534}
+  _disableOnDeath:
+  - {fileID: 6274716231347513315}
+  - {fileID: 7066648615307067331}
+  - {fileID: 6090003253690619173}
+  - {fileID: 6686463362321193023}
+  _restartDelaySeconds: 1
+--- !u!114 &3357442497618872441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8172613441284298179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c20e66770cce6a049b1cbb15f8b88f7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPickupReceiver
+  canPickup: 1
 --- !u!1 &8905555139089722089
 GameObject:
   m_ObjectHideFlags: 0

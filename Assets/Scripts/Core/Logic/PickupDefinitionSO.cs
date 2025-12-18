@@ -6,6 +6,7 @@ public class PickupDefinitionSO : ScriptableObject
 {
     public string displayName;
     public AudioClip sfx;
+    public float sfxVolume = 1f;
     public GameObject vfxPrefab;
 
     public List<PickupEffectSO> effects = new();
