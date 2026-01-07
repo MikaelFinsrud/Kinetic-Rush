@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 [DisallowMultipleComponent]
 public sealed class Coin : MonoBehaviour, IResettable
@@ -18,11 +19,13 @@ public sealed class Coin : MonoBehaviour, IResettable
     private float _noImpulseBackToPlayerTime;
     private bool canImpulseBackToPlayer = false;
     public bool isAttached = false;
-    
+
+    public event Action OnImpact;
+    public event Action<Collider> OnTrigger;
 
     private void Awake()
     {
-        GetComponent<AudioSource>().pitch = Random.Range(0.75f, 0.9f);
+        GetComponent<AudioSource>().pitch = UnityEngine.Random.Range(0.75f, 0.9f);
     }
 
     private void Start()
@@ -54,11 +57,18 @@ public sealed class Coin : MonoBehaviour, IResettable
             ImpulseBackToPlayer();
             canImpulseBackToPlayer = false;
         }
-
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        OnTrigger?.Invoke(other);
+    }
+
 
     private bool HandleImpact(Collision collision)
     {
+        OnImpact?.Invoke();
+
         // Contact (avoid collision.contacts which allocates)
         ContactPoint cp = collision.GetContact(0);
 
