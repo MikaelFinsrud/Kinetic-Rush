@@ -82,7 +82,7 @@ public class PushPullTarget : MonoBehaviour, IResettable
 
     private void Awake()
     {
-        Body = GetComponent<Rigidbody>();
+        Body = GetComponentInParent<Rigidbody>();
         IsAnchored = kind == TargetKind.GenericAlwaysAnchored;
     }
 

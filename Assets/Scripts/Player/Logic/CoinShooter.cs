@@ -47,12 +47,13 @@ public sealed class CoinShooter : MonoBehaviour, IResettable
     // Call this from your input layer (new Input System action, etc.)
     public void Shoot()
     {
+        if (Time.time < _nextShotTime) return;
+
         if (_currentCoin != null)
         {
             Destroy(_currentCoin.gameObject); // Prevent more than one coin at a time
         }
 
-        if (Time.time < _nextShotTime) return;
         _nextShotTime = Time.time + _shootCooldown;
 
         var coin = Instantiate(_coinPrefab, _muzzle.position, Quaternion.identity);
@@ -68,6 +69,11 @@ public sealed class CoinShooter : MonoBehaviour, IResettable
 
         coin.Shooter = gameObject;
         coin.Launch(inherited + (_muzzle.transform.forward * _shootSpeed), _coinSpinRadPerSec, _playerRigidbody);
+    }
+
+    public void ReduceCooldown(float amount)
+    {
+        _nextShotTime -= amount;
     }
 
     public void CaptureInitialState()

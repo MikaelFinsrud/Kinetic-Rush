@@ -1,5 +1,6 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 [DisallowMultipleComponent]
 public sealed class Coin : MonoBehaviour, IResettable
@@ -18,11 +19,14 @@ public sealed class Coin : MonoBehaviour, IResettable
     private float _noImpulseBackToPlayerTime;
     private bool canImpulseBackToPlayer = false;
     public bool isAttached = false;
-    
+
+    public event Action<Collider> OnImpact;
+    public event Action<Collider> OnTrigger;
+    public event Action<Collider> OnExitTrigger;
 
     private void Awake()
     {
-        GetComponent<AudioSource>().pitch = Random.Range(0.75f, 0.9f);
+        GetComponent<AudioSource>().pitch = UnityEngine.Random.Range(0.75f, 0.9f);
     }
 
     private void Start()
@@ -32,7 +36,7 @@ public sealed class Coin : MonoBehaviour, IResettable
 
     private void Reset()
     {
-        _rb = GetComponent<Rigidbody>();
+        _rb = GetComponentInParent<Rigidbody>();
     }
 
     private void FixedUpdate()
@@ -54,11 +58,22 @@ public sealed class Coin : MonoBehaviour, IResettable
             ImpulseBackToPlayer();
             canImpulseBackToPlayer = false;
         }
+    }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        OnTrigger?.Invoke(other);
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        OnExitTrigger?.Invoke(other);
     }
 
     private bool HandleImpact(Collision collision)
     {
+        OnImpact?.Invoke(collision.collider);
+
         // Contact (avoid collision.contacts which allocates)
         ContactPoint cp = collision.GetContact(0);
 
@@ -66,7 +81,7 @@ public sealed class Coin : MonoBehaviour, IResettable
         float impactSpeed = collision.relativeVelocity.magnitude;
 
         // Try to find a CoinTarget on the collider or its parents
-        CoinTarget target = collision.collider.GetComponent<CoinTarget>();
+        CoinTarget target = collision.collider.GetComponentInParent<CoinTarget>();
 
         if (target == null)
         {

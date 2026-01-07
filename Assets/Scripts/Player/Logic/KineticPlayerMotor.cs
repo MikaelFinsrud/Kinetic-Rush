@@ -146,8 +146,8 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         Instance = this;
 
 
-        _rb = GetComponent<Rigidbody>();
-        _capsule = GetComponent<CapsuleCollider>();
+        _rb = GetComponentInParent<Rigidbody>();
+        _capsule = GetComponentInParent<CapsuleCollider>();
 
         _rb.useGravity = false;      // we apply gravity manually
         _rb.freezeRotation = true;   // we rotate via script
