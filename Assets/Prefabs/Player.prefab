@@ -189,7 +189,7 @@ MonoBehaviour:
   _playerRigidbody: {fileID: 2622056009189611534}
   shootKey: 101
   _shootSpeed: 8
-  _shootCooldown: 0.15
+  _shootCooldown: 6
   _coinSpinRadPerSec: 15
   yInherit: 1
 --- !u!114 &6274716231347513315

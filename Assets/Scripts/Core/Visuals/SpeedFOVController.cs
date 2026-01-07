@@ -89,7 +89,7 @@ public sealed class SpeedFOVController : MonoBehaviour
     {
         if (PlayerPushPull.Instance != null)
         {
-            rigidbodySource = PlayerPushPull.Instance.GetComponent<Rigidbody>();
+            rigidbodySource = PlayerPushPull.Instance.GetComponentInParent<Rigidbody>();
         }
     }
 

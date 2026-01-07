@@ -28,7 +28,7 @@ public class PushPullTargetVisuals : MonoBehaviour
 
     private void Awake()
     {
-        _renderer = GetComponent<Renderer>();
+        _renderer = GetComponentInParent<Renderer>();
         _mpb = new MaterialPropertyBlock();
 
         _currentIntensity = defaultIntensity;

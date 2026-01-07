@@ -9598,6 +9598,10 @@ PrefabInstance:
       propertyPath: _bigImpulseCost
       value: 15
       objectReference: {fileID: 0}
+    - target: {fileID: 6090003253690619173, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
+      propertyPath: interactableMask.m_Bits
+      value: 9088
+      objectReference: {fileID: 0}
     - target: {fileID: 6686463362321193023, guid: 5d74496f70dd0914c90fc9cf5afa62ae, type: 3}
       propertyPath: airControl
       value: 5

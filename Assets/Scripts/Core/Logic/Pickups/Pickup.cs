@@ -12,7 +12,7 @@ public class Pickup : MonoBehaviour, IResettable
 
     private void Awake()
     {
-        _col = GetComponent<Collider>();
+        _col = GetComponentInParent<Collider>();
         _col.isTrigger = true;
     }
 

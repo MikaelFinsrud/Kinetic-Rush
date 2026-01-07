@@ -14,11 +14,11 @@ TagManager:
   - Player
   - PushPullGround
   - PushPullNoGround
-  - Coin
+  - CoinPhysics
   - Overlay
   - Walls
   - Pickups
-  - 
+  - CoinTrigger
   - 
   - 
   - 

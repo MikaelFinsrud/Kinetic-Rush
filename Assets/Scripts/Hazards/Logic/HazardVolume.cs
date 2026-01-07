@@ -8,7 +8,7 @@ public sealed class HazardVolume : MonoBehaviour
     private void Reset()
     {
         // Make it a trigger by default
-        var col = GetComponent<Collider>();
+        var col = GetComponentInParent<Collider>();
         col.isTrigger = true;
     }
 

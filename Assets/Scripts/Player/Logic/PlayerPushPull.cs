@@ -79,7 +79,7 @@ public class PlayerPushPull : MonoBehaviour, IResettable
 
     private void Reset()
     {
-        playerRb = GetComponent<Rigidbody>();
+        playerRb = GetComponentInParent<Rigidbody>();
         if (_playerCamera == null)
         {
             _playerCamera = Camera.main;
@@ -180,7 +180,7 @@ public class PlayerPushPull : MonoBehaviour, IResettable
             Collider col = _hits[i].collider;
             if (!col) continue;
 
-            PushPullTarget t = col.GetComponent<PushPullTarget>();
+            PushPullTarget t = col.GetComponentInParent<PushPullTarget>();
             if (!t) continue;
 
             // Pick a representative point on the collider that’s closest to the aim ray

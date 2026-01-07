@@ -25,7 +25,7 @@ public sealed class ResettableRigidbody : MonoBehaviour, IResettable
 
     private void Reset()
     {
-        if (_rb == null) _rb = GetComponent<Rigidbody>();
+        if (_rb == null) _rb = GetComponentInParent<Rigidbody>();
     }
 
     private void Start()
