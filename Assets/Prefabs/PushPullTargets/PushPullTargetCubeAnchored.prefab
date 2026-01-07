@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 8057229856458436616, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
+      propertyPath: pullForceMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

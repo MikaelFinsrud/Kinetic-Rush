@@ -396,7 +396,9 @@ public class PlayerPushPull : MonoBehaviour, IResettable
         if (target.Kind == PushPullTarget.TargetKind.Coin && !target.IsAnchored && target.Body != null)
         {
             Vector3 coinDir = isPull ? targetDir : _playerCamera.transform.forward;
-            target.Body.AddForce(coinDir * forceStrength, forceMode);
+            float forceMultiplier = isPull ? target.PullForceMultiplier : 1f;
+
+            target.Body.AddForce(coinDir * forceStrength * forceMultiplier, forceMode);
 
             return;
         }
@@ -419,6 +421,8 @@ public class PlayerPushPull : MonoBehaviour, IResettable
 
         playerImpulse = playerImpulse * kPlayer;
         Vector3 targetImpulse = targetDir * forceStrength * kTarget;
+
+        if (isPull) { targetImpulse *= target.PullForceMultiplier; }
 
         AddForcePlayer(playerImpulse, forceMode);
 

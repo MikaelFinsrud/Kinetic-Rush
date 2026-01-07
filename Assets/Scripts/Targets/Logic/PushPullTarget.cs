@@ -18,6 +18,8 @@ public class PushPullTarget : MonoBehaviour, IResettable
     // If zero/negative, we fall back to Rigidbody.mass.
     [SerializeField] private float interactionMass = 50f;
     // When anchored, we treat this as effectively infinite mass (world-attached).
+    [SerializeField] private float pullForceMultiplier = 1f;
+    public float PullForceMultiplier { get { return pullForceMultiplier; } }
 
     private float _nextPushImpulseTime;
     private float _nextPullImpulseTime;

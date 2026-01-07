@@ -149,6 +149,10 @@ PrefabInstance:
       propertyPath: interactionMass
       value: 0.01
       objectReference: {fileID: 0}
+    - target: {fileID: 8057229856458436616, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
+      propertyPath: pullForceMultiplier
+      value: 0.6
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: -6064507801221457777, guid: f0f8a2b67100c964c953e92b41510a30, type: 3}
     m_RemovedGameObjects: []
