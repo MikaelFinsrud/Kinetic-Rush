@@ -25,7 +25,6 @@ The game revolves around momentum-based movement using push and pull mechanics o
 ## 🛠️ Tech Stack
 
 * **Engine:** Unity (C#)
-* **Architecture:** Component-based, modular systems
 * **Version Control:** Git + GitHub
 
 ---
