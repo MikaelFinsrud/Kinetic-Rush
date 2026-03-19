@@ -58,12 +58,6 @@ The goal of Kinetic Rush was to improve my programming skills and code quality, 
 
 ---
 
-## 📸 Media
-
-*(Add short gameplay clips or GIFs of movement here — this is very impactful for this type of project)*
-
----
-
 ## 🔗 Status
 
 This is an early prototype and not a full game. The project serves as a technical and design exploration.
