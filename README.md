@@ -14,7 +14,7 @@ The game revolves around momentum-based movement using push and pull mechanics o
 
 ## 🚀 Features
 
-* Physics-based push and pull movement mechanics
+* Physics-based magnetic push and pull movement mechanics
 * Momentum-preserving sliding and slide-jumping
 * Responsive and snappy ground controls
 * Limited but meaningful air control
