@@ -9,7 +9,7 @@ public class RestartLevelManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogError("PlayerPushPull already exists!.");
+            Debug.LogError("RestartLevelManager already exists!.");
             Destroy(this.gameObject);
             return;
         }
@@ -27,7 +27,7 @@ public class RestartLevelManager : MonoBehaviour
 
     public void RestartLevel()
     {
-        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include);
 
         IResettable[] resettables = allMonoBehaviours.OfType<IResettable>().ToArray();
 

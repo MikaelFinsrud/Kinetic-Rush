@@ -62,15 +62,15 @@ public sealed class SpeedFOVController : MonoBehaviour
 
     private void Reset()
     {
-        targetCamera = FindFirstObjectByType<CinemachineCamera>();
-        rigidbodySource = FindFirstObjectByType<Rigidbody>();
+        targetCamera = FindAnyObjectByType<CinemachineCamera>();
+        rigidbodySource = FindAnyObjectByType<Rigidbody>();
         characterControllerSource = GetComponentInParent<CharacterController>();
     }
 
     private void Awake()
     {
         if (targetCamera == null)
-            targetCamera = FindFirstObjectByType<CinemachineCamera>();
+            targetCamera = FindAnyObjectByType<CinemachineCamera>();
 
         if (targetCamera == null)
         {
