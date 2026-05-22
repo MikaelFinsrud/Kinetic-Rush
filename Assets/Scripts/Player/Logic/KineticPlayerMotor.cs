@@ -194,7 +194,7 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         CheckGround();
         ApplyMovement();
         ClearInput();
-        Debug.Log($"Velocity: {_rb.linearVelocity.magnitude:F2}");
+        //Debug.Log($"Velocity: {_rb.linearVelocity.magnitude:F2}");
     }
 
     private void LateUpdate()

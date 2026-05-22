@@ -77,4 +77,9 @@ public class Pickup : MonoBehaviour, IResettable
             Destroy(currentVFX);
         }
     }
+
+    public PickupDefinitionSO GetSODefinition()
+    {
+        return definition;
+    }
 }

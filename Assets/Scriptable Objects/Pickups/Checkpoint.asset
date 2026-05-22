@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318847c3db1982847b943e16bfa67ab4, type: 3}
+  m_Name: Checkpoint
+  m_EditorClassIdentifier: Assembly-CSharp::PickupDefinitionSO
+  displayName: Checkpoint
+  sfx: {fileID: 8300000, guid: 9566e4c7d81d1484aaf0f6a8e3817d6d, type: 3}
+  sfxVolume: 0.25
+  vfxPrefab: {fileID: 2433151994187714776, guid: 75ca671b6cf73ce46a2f47325eff40dd, type: 3}
+  effects:
+  - {fileID: 11400000, guid: ae98f58c2c6210746a3ae068afcc7656, type: 2}
+  consumeOnSuccess: 1
