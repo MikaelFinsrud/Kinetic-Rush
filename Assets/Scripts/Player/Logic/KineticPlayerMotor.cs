@@ -178,6 +178,16 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
         LockCursor();
     }
 
+    private void OnEnable()
+    {
+        if (InputManager.Instance != null)
+        {
+            InputManager.Instance.OnJumpActionPerformed += () => _jumpQueued = true;
+            InputManager.Instance.OnSlideActionStarted += () => _slidePressed = true;
+            InputManager.Instance.OnSlideActionStopped += () => _slidePressed = false;
+        } 
+    }
+
     private void OnDisable()
     {
         UnlockCursor();
@@ -205,32 +215,11 @@ public class KineticPlayerMotor : MonoBehaviour, IResettable
     private void ReadInput()
     {
         // For now: old Input Manager. Later you can pipe in the new Input System here.
-        _moveInput = new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        );
+        _moveInput = InputManager.Instance?.GetMovementVectorNormalized() ?? Vector2.zero;
 
-        _lookInput = new Vector2(
-            Input.GetAxis("Mouse X"),
-            Input.GetAxis("Mouse Y")
-        );
+        _lookInput = InputManager.Instance?.GetLookInputVector() ?? Vector2.zero;
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            _jumpQueued = true;
-        }
-
-        if (Input.GetKeyDown(slideKey))
-        {
-            _slidePressed = true;
-        }
-
-        if (Input.GetKeyUp(slideKey))
-        {
-            _slideReleased = true;
-        }
-
-        _slideHeld = Input.GetKey(slideKey);
+        _slideHeld = InputManager.Instance?.IsSlidingHeld() ?? false;
 
         if (_slidePressed)
         {
